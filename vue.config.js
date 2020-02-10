@@ -17,13 +17,6 @@ module.exports = {
           "^/apis": ""
         }
       },
-      "/api": {
-        target: "https://m.amap.com",
-        changeOrigin: true,
-        pathRewrite: {
-          "^/api": ""
-        }
-      }
     }
   },
   chainWebpack: config => {

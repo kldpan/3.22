@@ -19,7 +19,7 @@ const routes = [
             name: "delivery",
             component: () => import("@/components/delivery/delivery.vue"),
             meta: {
-              title: "满易-发布货源"
+              title: "发布货源"
             },
           },
           {
@@ -40,7 +40,7 @@ const routes = [
         name:"order",
         component: () => import("@/components/order.vue"),
         meta: {
-          title: "满易-我的订单",
+          title: "我的订单",
         }
       },
       {
@@ -48,7 +48,7 @@ const routes = [
         name:"mine",
         component: () => import("@/components/mine.vue"),
         meta: {
-          title: "满易-个人中心",
+          title: "个人中心",
         }
       },
       {
