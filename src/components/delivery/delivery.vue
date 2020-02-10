@@ -7,8 +7,8 @@
          <div class="send-n1-left fl">
            <div class="sendIcon-n1">装</div>
          </div>
-         <div class="send-n1-address fl">
-           <div class="send-n1-big-area">上海市 虹口区</div>
+         <div class="send-n1-address fl"> 
+           <div class="send-n1-big-area" @click="toPath('/map')">{{current.status ? current.addressComponent.province + ' / ' + current.addressComponent.city : '填写城市 / 区域'}}</div>
            <div class="send-n1-small-area">点击输入详地址</div>
          </div>
          <div class="sendMore-n1 fr">
@@ -21,7 +21,7 @@
            <div class="sendIcon-n2">装</div>
          </div>
          <div class="send-n2-address fl">
-           <div class="send-n2-big-area">上海市 虹口区</div>
+           <div class="send-n2-big-area">填写城市 / 区域</div>
            <div class="send-n2-small-area">点击输入详地址</div>
          </div>
          <div class="sendMore-n2 fr">
@@ -166,14 +166,24 @@
       </div>
     </div>
 
+    <!-- 定位（不出现地图，直接定位） -->
+    <div class="amap-page-container">
+      <div :style="{width:'0px',height:'0px'}">
+        <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center">
+        </el-amap>
+      </div>
+    </div>
+
+
+
+
   </div>
 </template>
 
 <script>
-import { log } from 'util';
-
 export default {
   data(){
+    const self = this;
     return {
       popupVisible:false,
       bool:false,
@@ -198,13 +208,73 @@ export default {
       carType:["平板","高栏","厢式","集装箱","自卸","冷藏","保温","高低板","面包车","棉被车","爬梯车","飞翼车"],
       userCarLength:[],
       userCarType:[],
+      current:{},
+
+
+      center: [121.59996, 31.197646],
+      lng: 0,
+      lat: 0,
+      loaded: false,
+      currentPosition:'',
+      plugin: [{
+        enableHighAccuracy: true,//是否使用高精度定位，默认:true
+        timeout: 100,          //超过10秒后停止定位，默认：无穷大
+        maximumAge: 0,           //定位结果缓存0毫秒，默认：0
+        convert: true,           //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
+        showButton: true,        //显示定位按钮，默认：true
+        buttonPosition: 'RB',    //定位按钮停靠位置，默认：'LB'，左下角
+        showMarker: true,        //定位成功后在定位到的位置显示点标记，默认：true
+        showCircle: true,        //定位成功后用圆圈表示定位精度范围，默认：true
+        panToLocation: true,     //定位成功后将定位到的位置作为地图中心点，默认：true
+        zoomToAccuracy:true,//定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：f
+        extensions:'all',
+        pName: 'Geolocation',
+        events: {
+          init(o) {
+            // o 是高德地图定位插件实例
+            o.getCurrentPosition((status, result) => {
+              self.$nextTick();
+              // 将当前定位信息放在this.current中（深度拷贝）
+              self.current = JSON.parse(JSON.stringify(result));
+              let currentInfo = JSON.parse(JSON.stringify(result));
+              self.$store.commit('getCurrentInfo',currentInfo);
+              // 模拟将需要的数据存放在vuex中以供随时取用
+              // let res = result.addressComponent;
+              // let temp = {
+              //   province: res.province,
+              //   city: res.city,
+              //   district: res.district,
+              //   township: res.township,
+              //   street: res.street,
+              //   streetNumber:res.streetNumber,
+              //   currentC ity:result.formattedAddress
+              // };
+              // self.$store.commit('getCurrentCity',temp);
+
+
+              // if (result && result.position) {
+              //   self.lng = result.position.lng;
+              //   self.lat = result.position.lat;
+              //   self.center = [self.lng, self.lat];
+              //   self.loaded = true;
+              //   self.$nextTick();
+              // }
+            });
+          }
+        }
+      }]
     }
   },
   mounted() {
+    setTimeout(()=>{
+      console.log(this.current);
+    },1000)
+      
     
-  },
-  components:{
-
+    
+    // this.currentLocation = JSON.parse(JSON.stringify(this.$store.state.currentCity));
+    // console.log(this.$store.state.currentCity);
+    // console.log(this.currentLocation);
   },
   methods: {
     changeLoadWay(index){
@@ -266,7 +336,14 @@ export default {
     goPermanent(){
       this.toPath('/index/permanent');
       this.$options.parent.num = 3;
-    }
+    },
+    // getMapLocation(){
+    //   // AMap是高德地图的构造函数，这里.Map是创建地图
+    //   let mapObj = new AMap.Map('map-location',{        //'map-location'是对应页面盒子的id
+    //     resizeEnable: true,                             //自适应大小
+    //     zoom: 13                                        //初始窗口的大小
+    //   })
+    // }
   }
 };
 </script>

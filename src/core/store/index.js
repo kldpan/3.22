@@ -6,22 +6,18 @@ Vue.use(Vuex);       //this.$store.state
 
 export default new Vuex.Store({
   state: {     //全局属性变量  data
-    msg:"Msea",
-    name:"苹果",
-    price:18,
-    num:0,
-    goodsList:[]
+    currentCity:{},
   },
   mutations:{
-            //mutations,操作state方法,写函数
-            //在组件调用 Vuex mutations方法 使用 commit
-            //不要在组件操作 Vuex state
-            //   mutations 方法 第一参数 固定就 state
-      add(state,data){
-        // console.log(state);
-        state.num++;
-        // console.log(data)
-      }      
+    // getCurrentCity(state,data){
+    //   console.log(data);
+    //   state.currentCity = JSON.parse(JSON.stringify(data));
+    //   console.log(state.currentCity);
+    // },
+    getCurrentInfo(state,data){
+      state.currentInfo = JSON.parse(JSON.stringify(data));
+      // console.log(state.currentInfo);
+    },
   },
   getters:{
             //类似 组件内的 computed,函数名字 直接当变量去用

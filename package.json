@@ -1,5 +1,5 @@
 {
-  "name": "logistics-project",
+  "name": "logistics",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -16,6 +16,7 @@
     "vue": "^2.6.10",
     "vue-amap": "^0.5.10",
     "vue-router": "^3.0.0",
+    "vue-touch": "^2.0.0-beta.4",
     "vue-wechat-title": "^2.0.4",
     "vuex": "^3.0.1"
   },

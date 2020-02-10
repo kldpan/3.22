@@ -39,7 +39,6 @@ export default {
         {fromBigArea:'江苏省',fromSmallArea:'苏州市',toBigArea:'北京市',toSmallArea:'昌平',carLength:'13米车',carStyle:'平板', goodsName:'棉花',goodsWeight:'5吨',goodsVolume:''},
         {fromBigArea:'江苏省',fromSmallArea:'苏州市',toBigArea:'北京市',toSmallArea:'昌平',carLength:'13米车',carStyle:'平板', goodsName:'棉花',goodsWeight:'',goodsVolume:'200立方'},
       ],
-      props:[frequentGoodsList]
     }
   },
   mounted(){

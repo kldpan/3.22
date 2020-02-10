@@ -5,14 +5,14 @@
       <img slot="icon" :src="`${item.ImgUrl}${num === index ? '2.png' : '1.png'}`">
     </div> -->
 
-    <mt-tabbar v-model="selected" class="btm_nav">
-      <mt-tab-item v-for="(item,index) in pathList" :key="index" class="nav" @click="selectIcon(index)">
+    <div v-model="selected" class="btm_nav">
+      <div v-for="(item,index) in pathList" :key="index" class="nav" @click="selectIcon(index)">
         <div :class="btmIcon_classname[index]">
           <img slot="icon" :src="`${num === index ? item.selectedImgUrl : item.ImgUrl}`">
           <span :class="`${num === index ? 'selectedname' : 'name'}`">{{item.name}}</span>
         </div>
-      </mt-tab-item>
-    </mt-tabbar>
+      </div>
+    </div>
 
 
   </div>

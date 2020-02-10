@@ -15,19 +15,28 @@
   </div>
 
   <!-- 第二层——切换栏 -->
-    <!-- <tab/> -->
-    <div class="tab">
-      <div class="tabbox">
-        <!-- <router-link to="/index/delivery">发布货源</router-link>
-        <router-link to="/index/history">发布货源</router-link>
-        <router-link to="/index/permanent">常发货源</router-link>
-        <router-view></router-view> -->
-        <span @click="selectDelivery()" :class="1 === num ? 'select' : ''">发布货源</span>
-        <span @click="selectHistory()" :class="2 === num ? 'select' : ''">发货历史</span>
-        <span @click="selectPermanent()" :class="num === 3 ? 'select' : ''">常发货源</span>
-        <router-view></router-view>
-      </div>
+  <div class="tab">
+    <div class="tabbox">
+      <!-- <router-link to="/index/delivery">发布货源</router-link>
+      <router-link to="/index/history">发布货源</router-link>
+      <router-link to="/index/permanent">常发货源</router-link>
+      <router-view></router-view> -->
+
+      <v-touch v-on:swipeleft="onSwipeLeft" v-on:swiperight="onSwipeRight"  tag="div">
+
+      <span @click="selectDelivery()" :class="1 === num ? 'select' : ''">发布货源</span>
+      <span @click="selectHistory()" :class="2 === num ? 'select' : ''">发货历史</span>
+      <span @click="selectPermanent()" :class="num === 3 ? 'select' : ''">常发货源</span>
+      <router-view></router-view>
+
+      </v-touch>
+
+
     </div>
+  </div>
+
+  <!-- 测试左右滑动 -->
+
 
 
 </div>
@@ -50,6 +59,7 @@ export default {
     }
   },
   mounted(){
+    console.log(this);
     this.selectDelivery();
   },
   components:{
@@ -73,6 +83,24 @@ export default {
     selectPermanent(){
       this.toPath({path:"/index/permanent"});
       this.num = 3;
+    },
+    onSwipeRight(){
+      if(this.num === 2){
+        this.selectDelivery();
+        this.num  = 1;
+      }else if(this.num === 3){
+        this.selectHistory();
+        this.num = 2;
+      }
+    },
+    onSwipeLeft(){
+      if(this.num === 1){
+        this.selectHistory();
+        this.num = 2;
+      }else if(this.num === 2){
+        this.selectPermanent();
+        this.num = 3;
+      }
     },
   }
 }

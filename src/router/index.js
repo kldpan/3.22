@@ -59,6 +59,14 @@ const routes = [
           title: "货物信息",
         }
       },
+      {
+        path: "map",
+        name:"map",
+        component: () => import("@/components/map.vue"),
+        meta: {
+          title: "定位",
+        }
+      },
     ],
     redirect: "/index"
   }
