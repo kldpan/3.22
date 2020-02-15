@@ -3,7 +3,7 @@
     <h1>list</h1>
         <router-link to="/list/one">one</router-link>
       <router-view />
-      <button @click="test">test</button>
+      <button @click="test">list</button>
   </div>
 </template>
 

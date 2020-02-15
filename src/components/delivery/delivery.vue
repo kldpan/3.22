@@ -57,7 +57,7 @@
     </div>
 
     <!-- 第二层 -->
-    <div class="infos">
+    <!-- <div class="infos">
       <div class="goodsInfo clearfix">
         <div class="option-n1 fl">货物信息</div>
         <div class="option-n1-info fr" @click="toPath('/goodsInfo')">
@@ -80,7 +80,7 @@
           </ul>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- 第三层 -->
     <div class="permanent">

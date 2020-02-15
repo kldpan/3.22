@@ -4,10 +4,10 @@
   <div v-wechat-title="$route.meta.title"></div> 
   <!-- 第一层——顶栏 -->
   <div class="top clearfix">
-    <div class="top_lt fl">
+    <!-- <div class="top_lt fl">
       <span class="select">货主</span>
       <span class="pullup"></span>
-    </div>
+    </div> -->
     <div class="top_rt fr">
       <span class="news"></span>
       <span class="activity"></span>

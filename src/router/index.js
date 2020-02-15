@@ -51,14 +51,14 @@ const routes = [
           title: "个人中心",
         }
       },
-      {
-        path: "goodsInfo",
-        name:"goodsInfo",
-        component: () => import("@/components/goodsInfo.vue"),
-        meta: {
-          title: "货物信息",
-        }
-      },
+      // {
+      //   path: "goodsInfo",
+      //   name:"goodsInfo",
+      //   component: () => import("@/components/goodsInfo.vue"),
+      //   meta: {
+      //     title: "货物信息",
+      //   }
+      // },
       {
         path: "map",
         name:"map",
