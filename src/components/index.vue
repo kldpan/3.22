@@ -3,41 +3,38 @@
 <div>
   <div v-wechat-title="$route.meta.title"></div> 
   <!-- 第一层——顶栏 -->
-  <div class="top clearfix">
-    <!-- <div class="top_lt fl">
+  
+  <!-- 有货主司机切换按钮 -->
+  <!-- <div class="top clearfix">
+    <div class="top_lt fl">
       <span class="select">货主</span>
       <span class="pullup"></span>
-    </div> -->
+    </div>
     <div class="top_rt fr">
       <span class="news"></span>
       <span class="activity"></span>
     </div>
-  </div>
+  </div> -->
 
   <!-- 第二层——切换栏 -->
   <div class="tab">
-    <div class="tabbox">
-      <!-- <router-link to="/index/delivery">发布货源</router-link>
-      <router-link to="/index/history">发布货源</router-link>
-      <router-link to="/index/permanent">常发货源</router-link>
-      <router-view></router-view> -->
 
+    <!-- 消息 -->
+    <div class="news fl"></div>
+
+    <!-- 中间切换 -->
+    <div class="tabbox fl">
       <v-touch v-on:swipeleft="onSwipeLeft" v-on:swiperight="onSwipeRight"  tag="div">
-
-      <span @click="selectDelivery()" :class="1 === num ? 'select' : ''">发布货源</span>
-      <span @click="selectHistory()" :class="2 === num ? 'select' : ''">发货历史</span>
-      <span @click="selectPermanent()" :class="num === 3 ? 'select' : ''">常发货源</span>
-      <router-view></router-view>
-
+        <span @click="selectDelivery()" :class="1 === num ? 'select' : ''">发布货源</span>
+        <span @click="selectHistory()" :class="2 === num ? 'select' : ''">发货中</span>
+        <span @click="selectPermanent()" :class="num === 3 ? 'select' : ''">常发货源</span>
+        <router-view></router-view>
       </v-touch>
-
-
     </div>
+
+    <!-- 活动 -->
+    <div class="activity fr"></div>
   </div>
-
-  <!-- 测试左右滑动 -->
-
-
 
 </div>
 
@@ -59,7 +56,7 @@ export default {
     }
   },
   mounted(){
-    console.log(this);
+    // console.log(this);
     this.selectDelivery();
   },
   components:{
@@ -109,64 +106,72 @@ export default {
 
 
 <style lang="scss" scoped>
-.top{
-  background: #fff;
-  .top_lt{
-    width:20%;
-    height:r(88);
-    position: relative;
-    .select{
-      font-size: r(30);
-      font-family: PingFang SC;
-      color:#333;
-      line-height: r(88);
-      display: inline-block;
-      vertical-align: middle;
-      font-weight: 500;
-      margin-left:r(30);
-    }
-    .pullup{
-      width:0;
-      height:0;
-      border:r(10) solid;
-      border-color: #666 transparent transparent transparent;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-5%);
-      margin-left:r(10);
-    }
-  }
-  .top_rt{
-    width:16.8%;
-    height:r(88);
-    .news{
-      display: inline-block;
-      width:r(36);
-      height:r(36);
-      background:url(../assets/news.png) no-repeat 0 0;
-      background-size: r(36) r(36);
-      margin-top:r(26);
-    }
-    .activity{
-      display: inline-block;
-      width:r(36);
-      height:r(36);
-      background:url(../assets/activity.png) no-repeat 0 0;
-      background-size: r(36) r(36);
-      margin:r(26) r(30) 0 r(24);
-    }
-  }
-}
+// .top{
+//   background: #fff;
+//   .top_lt{
+//     width:20%;
+//     height:r(88);
+//     position: relative;
+//     .select{
+//       font-size: r(30);
+//       font-family: PingFang SC;
+//       color:#333;
+//       line-height: r(88);
+//       display: inline-block;
+//       vertical-align: middle;
+//       font-weight: 500;
+//       margin-left:r(30);
+//     }
+//     .pullup{
+//       width:0;
+//       height:0;
+//       border:r(10) solid;
+//       border-color: #666 transparent transparent transparent;
+//       position: absolute;
+//       top: 50%;
+//       transform: translateY(-5%);
+//       margin-left:r(10);
+//     }
+//   }
+//   .top_rt{
+//     width:16.8%;
+//     height:r(88);
+//     .news{
+//       display: inline-block;
+//       width:r(36);
+//       height:r(36);
+//       background:url(../assets/news.png) no-repeat 0 0;
+//       background-size: r(36) r(36);
+//       margin-top:r(26);
+//     }
+    // .activity{
+    //   display: inline-block;
+    //   width:r(36);
+    //   height:r(36);
+    //   background:url(../assets/activity.png) no-repeat 0 0;
+    //   background-size: r(36) r(36);
+    //   margin:r(26) r(30) 0 r(24);
+    // }
+//   }
+// }
 
 .tab{
   width:100%;
   height:r(90);
   background: #fff;
+  .news{
+    display: inline-block;
+    width:r(36);
+    height:r(36);
+    background:url(../assets/news.png) no-repeat 0 0;
+    background-size: r(36) r(36);
+    margin:r(26) r(0) r(0) r(30);
+  }
   .tabbox{
     width:r(540);
     height:r(60);
     background: #F2F6F9;
-    margin:0 auto;
+    margin: r(14) r(0) r(0) r(39);
     border-radius: r(50);
     position: relative;
     span{
@@ -183,6 +188,14 @@ export default {
       background: #0350A0;
       border-radius: r(50);
     }
+  }
+  .activity{
+    display: inline-block;
+    width:r(36);
+    height:r(36);
+    background:url(../assets/activity.png) no-repeat 0 0;
+    background-size: r(36) r(36);
+    margin:r(26) r(30) 0 r(0);
   }
 }
 </style>

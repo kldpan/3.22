@@ -47,6 +47,21 @@ const routes = [
         path: "mine",
         name:"mine",
         component: () => import("@/components/mine.vue"),
+        children: [
+          {
+            path: "/mine/login",
+            name: "login",
+            component: () => import("@/components/login/index.vue"),
+            meta: {
+              title: "登录"
+            },
+          },
+          {
+            path: "/mine/register",
+            name:"register",
+            component:()=>import("@/components/register/index.vue")
+          },
+        ],
         meta: {
           title: "个人中心",
         }
@@ -96,9 +111,9 @@ router.beforeEach((to, from, next) => {
       next({
         path: "/order"
       });
-    } else if (params.userType === "mine") {
+    } else if (params.userType === "login") {
       next({
-        path: "/mine"
+        path: "/login"
       });
     }else{
       next();

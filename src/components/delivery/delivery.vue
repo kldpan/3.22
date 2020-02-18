@@ -15,8 +15,9 @@
            <span class="sendMore-n1-span" @click="setBool()" v-show="!bool"></span>
          </div>
       </div>
+
       <!-- 装二 -->
-      <div class="send-n2 clearfix" v-show="bool">
+      <!-- <div class="send-n2 clearfix" v-show="bool">
          <div class="send-n2-left fl">
            <div class="sendIcon-n2">装</div>
          </div>
@@ -27,7 +28,8 @@
          <div class="sendMore-n2 fr">
            <span class="sendMore-n2-span" @click="setBool()"></span>
          </div>
-      </div>
+      </div> -->
+
       <!-- 卸一 -->
       <div class="receive-n1 clearfix">
         <div class="receive-n1-left fl">
@@ -41,8 +43,9 @@
            <span class="receiveMore-n1-span" @click="setShowNum(1)" v-show="!showNum"></span>
          </div>
       </div>
+
       <!-- 卸二 -->
-      <div class="receive-n2 clearfix" v-show="showNum">
+      <!-- <div class="receive-n2 clearfix" v-show="showNum">
         <div class="receive-n2-left fl">
            <div class="receiveIcon-n2">卸</div>
          </div>
@@ -53,8 +56,38 @@
          <div class="receiveMore-n2 fr">
            <span class="receiveMore-n2-span" @click="setShowNum(0)"></span>
          </div>
+      </div> -->
+
+      <!-- 测距及选择几装几卸 -->
+      <div class="n3 clearfix">
+        <div class="length fl">
+          <p>运输距离 : {{current.status}}公里</p>
+        </div>
+        <div class="loadway fr" @click="selectLoadway()">
+          <span class="add">+</span><span class="loadwaymore">{{userSelectLoadWay || '一装一卸'}}</span>
+        </div>
       </div>
+
+      <div class="loadwayModal" v-show="isLoadwayModalShow">
+        <div class="cancelArea" @click="closeLoadwayModal()"></div>
+        <div class="selectArea">
+            <!-- 第一层 -->
+            <div class="title">
+              <span class="cancel" @click="closeLoadwayModal()">取消</span>
+              <span class="titlename">几装几卸</span>
+              <span class="submit" @click="submitLoadway()">完成</span>
+            </div>
+            <!-- 第二层 -->
+            <ul>
+              <li v-for="(item,index) in loadway" :key="index" @click="changeLoadWay(item,index)" :class="num === index ? 'selectedWay' : 'otherLoadWay'">
+                <span>{{item}}</span>
+              </li>
+            </ul>
+        </div> 
+      </div>
+
     </div>
+    
 
     <!-- 第二层 -->
     <!-- <div class="infos">
@@ -83,6 +116,11 @@
     </div> -->
 
     <!-- 第三层 -->
+    <div class="publish">
+      <button>发布</button>
+    </div>
+
+    <!-- 第四层 -->
     <div class="permanent">
       <div class="header clearfix">
         <div class="option fl">常发货源</div>
@@ -90,18 +128,16 @@
           <div class="allPermanent ">全部常发货源</div>
           <span></span>
         </div>
-      </div> 
-      <div class="permanent-content">
+      </div>
+      <div class="permanentdata" v-if="permanentData">
+        
+      </div>
+      <div class="permanent-content" v-else="!permanentData">
         <p>您尚未保存任何常发货源</p>
       </div>
     </div>
 
-    <!-- <div class="test"></div> -->
-
-    <!-- 第四层 -->
-    <div class="publish">
-      <button>发布货源</button>
-    </div>
+    
 
     <!-- 第五层 -->
     <!-- <div class="car"> -->
@@ -193,7 +229,11 @@ export default {
       carTypeNum:0,
       modelShow:false,
       isSelected:[],
-      loadWay:["1装1卸","2装1卸","1装2卸","2装2卸"],
+      loadway:['一装一卸','两装一卸','一装两卸','两装两卸'],
+      loadwayBool:false,
+      userSelectLoadWay:'',
+      isLoadwayModalShow: false,
+      permanentData: '',
       carLength:[
         {carLength: 8.7, bool:false},
         {carLength: 9.6, bool:false},
@@ -267,7 +307,7 @@ export default {
   },
   mounted() {
     setTimeout(()=>{
-      console.log(this.current);
+      // console.log(this.current);
     },1000)
       
     
@@ -277,20 +317,17 @@ export default {
     // console.log(this.currentLocation);
   },
   methods: {
-    changeLoadWay(index){
+    changeLoadWay(item,index){
       this.num = index;
+      this.userSelectLoadWay = item;
       if(index === 0){
-        this.bool = false;
-        this.showNum = 0;
+        this.loadwayBool = false;
       }else if(index === 1){
-        this.bool = true;
-        this.showNum = 0;
+        this.loadwayBool = true;
       }else if(index === 2){
-        this.bool = false;
-        this.showNum = 1;
+        this.loadwayBool = false;
       }else if(index === 3){
-        this.bool = !this.bool;
-        this.showNum = 1;
+        this.loadwayBool = !this.loadwayBool;
       }
     },
     setBool(){
@@ -335,7 +372,18 @@ export default {
     },
     goPermanent(){
       this.toPath('/index/permanent');
-      this.$options.parent.num = 3;
+      this.$parent.$parent.num = 3;
+    },
+    selectLoadway(){
+      this.isLoadwayModalShow = true;
+    },
+    submitLoadway(){
+      this.isLoadwayModalShow = false;
+    },
+    closeLoadwayModal(){
+      this.isLoadwayModalShow = false;
+      this.userSelectLoadWay = '';
+      this.num = 0;
     },
     // getMapLocation(){
     //   // AMap是高德地图的构造函数，这里.Map是创建地图
@@ -351,11 +399,11 @@ export default {
 <style lang="scss" scoped>
   .delivery{
     width:r(750);
-    margin:r(50) 0 0 r(-105);
+    margin:r(30) 0 0 r(-105);
     // 收发层
     .dispatch{
       width:r(690);
-      // height:r(355);
+      height:r(444);
       border-radius: r(20);
       margin:0 auto;
       background: #fff;
@@ -595,6 +643,136 @@ export default {
           }
         }
       }
+      .n3{
+        width: r(650);
+        height: r(50);
+        margin:r(19) auto;
+        .length{
+          width:r(300);
+          height:r(50);
+          line-height: r(50);
+          color:#999;
+          font-size: r(26);
+        }
+        .loadway{
+          width:r(180);
+          height: r(50);
+          line-height: r(50);
+          border:1px solid #ccc;
+          text-align: center;
+          border-radius: r(28);
+          font-size: r(26);
+          .add{
+            color:999;
+            font-size: r(32);
+            font-weight: 100;
+          }
+          .loadwaymore{
+            color:#666;
+            font-size: r(26);
+            margin-left:r(10);
+          }
+        }
+      }
+      .loadwayModal{
+        width:100%;
+        height:100%;
+        position:fixed;
+        left:0;
+        top:0;
+        z-index:100000;
+        background:rgba(0,0,0,0.3);
+        .cancelArea{
+          width:100%;
+          height:r(876);
+        }
+        .selectArea{
+          width:100%;
+          height:r(458);
+          background:#fff;
+          .title{
+            width:r(710);
+            height: r(88);
+            margin:0 auto;
+            .cancel{
+              font-size:r(32);
+              font-family:PingFang SC;
+              font-weight:400;
+              line-height:25px;
+              color:rgba(3,80,160,1);
+              line-height: r(88);
+            }
+            .titlename{
+              font-size:r(32);
+              font-family:PingFang SC;
+              font-weight:500;
+              line-height:r(88);
+              color:#333;
+              margin-left:r(227);
+            }
+            .submit{
+              font-size:r(32);
+              font-family:PingFang SC;
+              font-weight:400;
+              line-height:25px;
+              color:rgba(3,80,160,1);
+              line-height: r(88);
+              margin-left:r(227);
+            }
+          }
+          ul{
+            width:r(710);
+            height:r(370);
+            margin:0 auto;
+            .selectedWay{
+              font-family: PingFang SC;
+              text-align: center;
+              width:r(710);
+              height:r(92);
+              background: #F7F7F7;
+              border-top: 1px solid rgba(198,198,198,0.3);
+              line-height: r(50);
+              color:#0350A0;
+              background:#fff;
+              margin:0 auto;
+              span{
+                display:block;
+                width:r(160);
+                height:r(56);
+                font-size:r(26);
+                font-family: PingFang SC;
+                margin:r(18) auto;
+                border-radius: r(28);
+                border:1px solid #0350A0;
+                line-height:r(56);
+              }
+            }
+            .otherLoadWay{
+              font-family: PingFang SC;
+              text-align: center;
+              width:r(710);
+              height:r(92);
+              background: #F7F7F7;
+              border-top: 1px solid rgba(198,198,198,0.3);
+              line-height: r(50);
+              color:#666;
+              background:#fff;
+              margin:0 auto;
+              span{
+                display:block;
+                width:r(160);
+                height:r(56);
+                font-size:r(26);
+                font-family: PingFang SC;
+                margin:r(18) auto;
+                border-radius: r(28);
+                background:#f7f7f7;
+                line-height:r(56);
+              }
+            }
+          }
+        }
+      }
     }
     // 货物信息层
     .infos{
@@ -722,6 +900,24 @@ export default {
         }
       }
     }
+
+    // 发布按钮区
+    .publish{
+      width:r(690);
+      height:r(86);
+      margin:r(20) auto;
+      button{
+        width:r(690);
+        height:r(86);
+        border-radius: r(43);
+        background:#F28312;
+        border:none;
+        font-size: r(32);
+        color:#fff;
+        font-weight:100;
+      }
+    }
+
     // 常发货源区
     .permanent{
       width:r(690);
@@ -778,34 +974,6 @@ export default {
           line-height: r(26);
           margin-top:r(27);
         }
-      }
-    }
-    // 测试区
-    // .test{
-    //   width:100%;
-    //   height:r(300);
-    //   background:pink;
-    // }
-
-    // 发布按钮区
-    .publish{
-      width:r(300);
-      height:r(86);
-      margin:r(30) auto 0;
-      position: fixed;
-      left:r(250);
-      bottom:r(145);
-      display: flex;
-      z-index: 1000;
-      button{
-        width:r(300);
-        height:r(86);
-        border-radius: r(43);
-        background:#F28312;
-        border:none;
-        font-size: r(32);
-        color:#fff;
-        margin:auto;
       }
     }
 
