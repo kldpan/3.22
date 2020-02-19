@@ -44,26 +44,43 @@ const routes = [
         }
       },
       {
+        path: "login",
+        name:"login",
+        component: () => import("@/components/login/index.vue"),
+        meta: {
+          title: "登录页",
+        }
+      },
+      {
+        path: "register",
+        name:"register",
+        component: () => import("@/components/register/index.vue"),
+        meta: {
+          title: "注册页",
+        }
+      },
+      {
         path: "mine",
         name:"mine",
         component: () => import("@/components/mine.vue"),
-        children: [
-          {
-            path: "/mine/login",
-            name: "login",
-            component: () => import("@/components/login/index.vue"),
-            meta: {
-              title: "登录"
-            },
-          },
-          {
-            path: "/mine/register",
-            name:"register",
-            component:()=>import("@/components/register/index.vue")
-          },
-        ],
         meta: {
           title: "个人中心",
+        }
+      },
+      {
+        path: "service",
+        name:"service",
+        component: () => import("@/components/service.vue"),
+        meta: {
+          title: "服务条款",
+        }
+      },
+      {
+        path: "privacy",
+        name:"privacy",
+        component: () => import("@/components/privacy.vue"),
+        meta: {
+          title: "隐私政策",
         }
       },
       // {

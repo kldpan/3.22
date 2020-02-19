@@ -56,8 +56,16 @@ export default {
     }
   },
   mounted(){
-    // console.log(this);
     this.selectDelivery();
+
+    // this.$apis.getTest01().then((res) => {
+    //   console.log(res.data.data);
+    // });
+
+    this.$apis.getTest02().then((res) => {
+      console.log(res.data.Tag.mainresult);
+    });
+
   },
   components:{
     // tab,

@@ -256,7 +256,7 @@ export default {
       this.search_key = '';
     },
     back(){
-      this.$router.back();
+      this.$router.go(0);
     },
     getRecord(){
       this.bool = true;

@@ -9,14 +9,27 @@ module.exports = {
   devServer: {
     host: "0.0.0.0",
     port: 8899,
+
+    // cnode代理
+    // proxy: {
+    //   "/apis": {
+    //     target: "https://cnodejs.org",
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       "^/apis": ""
+    //     }
+    //   },
+    // },
+
+    // 贝思客代理
     proxy: {
       "/apis": {
-        target: "https://cnodejs.org",
+        target: "http://m.bestcake.com",
         changeOrigin: true,
         pathRewrite: {
           "^/apis": ""
         }
-      },
+      }
     }
   },
   chainWebpack: config => {

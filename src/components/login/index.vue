@@ -2,8 +2,8 @@
   <div class="login">
     <!-- 第一层 -->
     <div class="top clearfix">
-      <div class="back fl"></div>
-      <div class="register fr" @click="goRegister()">注册</div>
+      <div class="back fl" @click="back()"></div>
+      <div class="register fr" @click="toPath('/register')">注册</div>
     </div>
 
     <!-- 第二层 -->
@@ -15,11 +15,12 @@
         </div>
         <div class="code">
           <input type=number placeholder="请输入验证码"/>
-          <Timer slot="icon" @click="sendcodes"></Timer>
+          <!--  @click="sendcodes()" -->
+          <Timer slot="icon"></Timer>
         </div>
       </div>
       <div class="loginbtn">
-        <button>登录</button>
+        <div class="submit" @click="toPath('/mine')">登录</div>
       </div>
     </div>
 
@@ -34,16 +35,28 @@
     <!-- 第四层 -->
     <div class="rules">
       <p>登录即代表您已经同意</p>
-      <span class="service">《服务条款》</span>
+      <span class="service" @click="toPath('/service')">《服务条款》</span>
       <span class="and">和</span>
-      <span class="privacy">《隐私政策》</span>
+      <span class="privacy" @click="toPath('/privacy')">《隐私政策》</span>
     </div>
 
     <!-- 第五层 -->
-    <div class="call">
+    <div class="call" @click="showCall()" ref="callPhone">
       <span class="phoneicon"></span>
-      <span class="phonenum">客服电话：168-1688-8888</span>
+      <span class="phonenum">客服电话：</span>
+      <span class="number">12345</span>
     </div>
+
+    <!-- 第六层 -->
+    <div class="callModal" v-show="callBool">
+      <div class="callnow" @click="callPhone()">
+        <span class="callicon"></span>
+        <span class="callnum">呼叫 12345</span>
+      </div>
+      <div class="cancelcall" @click="cancelCall()">取消</div>
+    </div>
+
+
   </div>
 </template>
 
@@ -55,6 +68,7 @@ Vue.use(Toast);
 export default {
   data(){
     return {
+      callBool:false,
       offGray: true,
       tabItem: 1,
       checked: true,
@@ -81,49 +95,57 @@ export default {
           vm.fullPath = from.fullPath
       })
   },
-  created(){
-      // setTimeout(() => {
-      //     this.offGray =  false
-      // }, 500);
-      let dataLogin = null
-      if(this.$store.state.data.token || this.$store.state.data.wxOpenId == '' ){ //
-          this.offGray =  false
-          this.getInfo2() //重新触发微信绑定
-      }else{
-          this.getInfo() //第一次 触发 微信 登录 进行微信绑定
-      }
-        /**
-         if (localStorage.getItem('loginInfo')) { //localStorage 是否过期
-              let b = JSON.parse(localStorage.getItem('loginInfo'));
-              let time = b.time;
-              let data = b.date;
-              if ((parseInt(time) + parseInt(data)) < new Date().getTime()) {
-                  window.localStorage.removeItem('loginInfo');
-              } else {
-                  this.form1.username = b.username;
-                  this.form1.password = b.password;
-                  this.form1.openid = b.openid;
+  // created(){
+  //     // setTimeout(() => {
+  //     //     this.offGray =  false
+  //     // }, 500);
+  //     let dataLogin = null
+  //     if(this.$store.state.data.token || this.$store.state.data.wxOpenId == '' ){ //
+  //         this.offGray =  false
+  //         this.getInfo2() //重新触发微信绑定
+  //     }else{
+  //         this.getInfo() //第一次 触发 微信 登录 进行微信绑定
+  //     }
+  //       /**
+  //        if (localStorage.getItem('loginInfo')) { //localStorage 是否过期
+  //             let b = JSON.parse(localStorage.getItem('loginInfo'));
+  //             let time = b.time;
+  //             let data = b.date;
+  //             if ((parseInt(time) + parseInt(data)) < new Date().getTime()) {
+  //                 window.localStorage.removeItem('loginInfo');
+  //             } else {
+  //                 this.form1.username = b.username;
+  //                 this.form1.password = b.password;
+  //                 this.form1.openid = b.openid;
 
-                  this.form2.username = b.username;
-                  this.form2.password = b.password;
-                  this.form2.openid = b.openid;
-              }
-          }
-        */
-    document.title = '用户登录'
-  },
-  beforeRouteLeave(to, from, next){
-      document.title = '易棉购'
-      next()
-  },
+  //                 this.form2.username = b.username;
+  //                 this.form2.password = b.password;
+  //                 this.form2.openid = b.openid;
+  //             }
+  //         }
+  //       */
+  //   document.title = '用户登录'
+  // },
+  // beforeRouteLeave(to, from, next){
+  //     document.title = '易棉购'
+  //     next()
+  // },
   methods: {
-    goRegister(){
-      this.$router.push('/register');
+    toPath(url){
+      this.$router.push(url);
     },
-    onClickLeft() {
-        this.$router.push({
-            path: '/home'
-        });
+    back(){
+      this.$router.go(0);
+    },
+    showCall(){
+      this.callBool = true;
+    },
+    callPhone(){
+      let phoneNumber = Number(this.$refs.callPhone.children[2].innerHTML);
+      window.location.href = 'tel://' + phoneNumber;
+    },
+    cancelCall(){
+      this.callBool = false;
     },
     tabTitle(val) {
         this.tabItem = val;
@@ -364,18 +386,18 @@ export default {
       })
     }
   },
-  mounted() {
-    let dataw = Cookies.get("loginInfo") ? JSON.parse(Cookies.get("loginInfo")): {};
-    if(dataw){
-      this.form1.username = dataw.username;
-      this.form1.password = dataw.password;
-      this.form1.openid = dataw.openid;
-    }else{
-      this.form1.username = '';
-      this.form1.password = '';
-      this.form1.openid = '';
-    }
-  }
+  // mounted() {
+  //   let dataw = Cookies.get("loginInfo") ? JSON.parse(Cookies.get("loginInfo")): {};
+  //   if(dataw){
+  //     this.form1.username = dataw.username;
+  //     this.form1.password = dataw.password;
+  //     this.form1.openid = dataw.openid;
+  //   }else{
+  //     this.form1.username = '';
+  //     this.form1.password = '';
+  //     this.form1.openid = '';
+  //   }
+  // }
 }
 
 </script>
@@ -460,7 +482,7 @@ export default {
       width:r(690);
       height:r(86);
       margin:r(50) auto 0;
-      button{
+      .submit{
         width:r(690);
         height:r(86);
         border-radius: r(16);
@@ -469,6 +491,8 @@ export default {
         font-size: r(32);
         color:#999;
         font-weight:100;
+        text-align:center;
+        line-height:r(86);
       }
     }
   }
@@ -550,6 +574,54 @@ export default {
       display:inline-block;
       margin-left:r(20);
       color:#999;
+    }
+    .number{
+      color:#999;
+    }
+  }
+
+  .callModal{
+    width:100%;
+    height:r(1334);
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:10000000;
+    background:rgba(0,0,0,0.3);
+    .callnow{
+      width:r(690);
+      height:r(114);
+      margin:r(1056) auto 0;
+      background:#fff;
+      border-radius:r(20);
+      line-height:r(114);
+      .callicon{
+        display:inline-block;
+        width:r(46);
+        height:r(46);
+        background:url(../../assets/call.png) no-repeat;
+        background-size:r(46) r(46);
+        vertical-align:middle;
+        margin:0 r(30);
+      }
+      .callnum{
+        color:#108EE9;
+        font-size:r(40);
+        font-weight:500;
+        vertical-align:middle;
+      }
+    }
+    .cancelcall{
+      width:r(690);
+      height:r(114);
+      margin:r(20) auto 0;
+      background:#fff;
+      border-radius:r(20);
+      text-align:center;
+      line-height:r(114);
+      font-size:r(40);
+      color:#108EE9;
+      font-weight:500;
     }
   }
 }
