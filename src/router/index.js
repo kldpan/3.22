@@ -62,9 +62,25 @@ const routes = [
       {
         path: "mine",
         name:"mine",
-        component: () => import("@/components/mine.vue"),
+        component: () => import("@/components/mine/mine.vue"),
+        meta: {
+          title: "我的",
+        }
+      },
+      {
+        path: "mineinfos",
+        name:"mineinfos",
+        component: () => import("@/components/mine/mineinfos.vue"),
         meta: {
           title: "个人中心",
+        }
+      },
+      {
+        path: "setting",
+        name:"setting",
+        component: () => import("@/components/mine/setting.vue"),
+        meta: {
+          title: "设置",
         }
       },
       {

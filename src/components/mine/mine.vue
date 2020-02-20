@@ -2,14 +2,14 @@
   <div class="mine">
     <!-- 第一层 -->
     <div class="top">
-      <span class="setting"></span>
+      <span class="setting" @click="toPath('/setting')"></span>
     </div>
 
     <!-- 第二层 -->
     <div class="infos clearfix">
       <!-- 左 -->
       <div class="head fl">
-        <img src="../assets/head.png"/>
+        <img src="../../assets/head.png"/>
       </div>
       <!-- 中 -->
       <div class="info fl">
@@ -27,7 +27,7 @@
         </div>
       </div>
       <!-- 右 -->
-      <div class="topersoncenter fr">
+      <div class="topersoncenter fr" @click="toPath('/mineinfos')">
         <span class="infosmore"></span>
       </div>
     </div>
@@ -68,7 +68,22 @@
 
 <script>
 export default {
+  data(){
+    return {
 
+    }
+  },
+  components:{
+
+  },
+  mounted(){
+
+  },
+  methods:{
+    toPath(url){
+      this.$router.push(url);
+    }
+  }
 }
 </script>
 
@@ -85,7 +100,7 @@ export default {
       display:inline-block;
       width:r(39);
       height:r(39);
-      background:url(../assets/setting.png) no-repeat;
+      background:url(../../assets/setting.png) no-repeat;
       background-size:r(39) r(39);
       margin:r(13) r(0) r(13) r(681);
     }
@@ -150,7 +165,7 @@ export default {
       }
     }
     .topersoncenter{
-      width:r(50);
+      width:r(150);
       height:r(186);
       line-height:r(186);
       text-align:right;
@@ -158,7 +173,7 @@ export default {
         display:inline-block;
         width:r(14);
         height:r(22);
-        background:url(../assets/right.png) no-repeat;
+        background:url(../../assets/right.png) no-repeat;
         background-size:r(14) r(22);
         margin-right:r(30);
       }
@@ -176,7 +191,7 @@ export default {
       display:inline-block;
       width:r(38);
       height:r(38);
-      background:url(../assets/setting.png) no-repeat;
+      background:url(../../assets/setting.png) no-repeat;
       background-size:r(38) r(38);
       margin: r(25) r(25) 0 r(33);
     }
@@ -188,7 +203,7 @@ export default {
       display:inline-block;
         width:r(14);
         height:r(22);
-        background:url(../assets/right.png) no-repeat;
+        background:url(../../assets/right.png) no-repeat;
         background-size:r(14) r(22);
         margin-right:r(30);
         margin-top:r(33);
@@ -206,7 +221,7 @@ export default {
       display:inline-block;
       width:r(38);
       height:r(38);
-      background:url(../assets/setting.png) no-repeat;
+      background:url(../../assets/setting.png) no-repeat;
       background-size:r(38) r(38);
       margin: r(25) r(25) 0 r(33);
     }
@@ -218,7 +233,7 @@ export default {
       display:inline-block;
         width:r(14);
         height:r(22);
-        background:url(../assets/right.png) no-repeat;
+        background:url(../../assets/right.png) no-repeat;
         background-size:r(14) r(22);
         margin-right:r(30);
         margin-top:r(33);
@@ -236,7 +251,7 @@ export default {
       display:inline-block;
       width:r(38);
       height:r(38);
-      background:url(../assets/setting.png) no-repeat;
+      background:url(../../assets/setting.png) no-repeat;
       background-size:r(38) r(38);
       margin: r(25) r(25) 0 r(33);
     }
@@ -248,7 +263,7 @@ export default {
       display:inline-block;
         width:r(14);
         height:r(22);
-        background:url(../assets/right.png) no-repeat;
+        background:url(../../assets/right.png) no-repeat;
         background-size:r(14) r(22);
         margin-right:r(30);
         margin-top:r(33);
@@ -265,7 +280,7 @@ export default {
       display:inline-block;
       width:r(38);
       height:r(38);
-      background:url(../assets/setting.png) no-repeat;
+      background:url(../../assets/setting.png) no-repeat;
       background-size:r(38) r(38);
       margin: r(25) r(25) 0 r(33);
     }
@@ -277,7 +292,7 @@ export default {
       display:inline-block;
         width:r(14);
         height:r(22);
-        background:url(../assets/right.png) no-repeat;
+        background:url(../../assets/right.png) no-repeat;
         background-size:r(14) r(22);
         margin-right:r(30);
         margin-top:r(33);

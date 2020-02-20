@@ -53,6 +53,7 @@ export default {
     return {
       bool:true,
       num:1,
+      testData:[]
     }
   },
   mounted(){
@@ -60,11 +61,15 @@ export default {
 
     // this.$apis.getTest01().then((res) => {
     //   console.log(res.data.data);
+    //   let resData = res.data.data;
+    //   for(let i=0; i<resData.length; i++){
+    //     this.testData.push(resData[i]);
+    //   }
     // });
 
-    this.$apis.getTest02().then((res) => {
-      console.log(res.data.Tag.mainresult);
-    });
+    // this.$apis.getTest02().then((res) => {
+    //   console.log(res.data.Tag.mainresult);
+    // });
 
   },
   components:{

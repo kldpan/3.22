@@ -129,10 +129,12 @@
           <span></span>
         </div>
       </div>
-      <div class="permanentdata" v-if="permanentData">
-        
+      <div class="permanentdata" v-if="testData.length !== 0">
+        <ul>
+          <li v-for="(item,index) in testData" :key="index">{{item.title}}</li>
+        </ul>
       </div>
-      <div class="permanent-content" v-else="!permanentData">
+      <div class="permanent-content" v-else="testData.length === 0">
         <p>您尚未保存任何常发货源</p>
       </div>
     </div>
@@ -249,6 +251,7 @@ export default {
       userCarLength:[],
       userCarType:[],
       current:{},
+      testData:[],
 
 
       center: [121.59996, 31.197646],
@@ -310,8 +313,15 @@ export default {
       // console.log(this.current);
     },1000)
       
-    
-    
+    this.$apis.getTest01().then((res) => {
+      // console.log(res.data.data);
+      let resData = res.data.data;
+      for(let i=0; i<resData.length; i++){
+        this.testData.push(resData[i]);
+        console.log(this.testData);
+      }
+    });
+
     // this.currentLocation = JSON.parse(JSON.stringify(this.$store.state.currentCity));
     // console.log(this.$store.state.currentCity);
     // console.log(this.currentLocation);
@@ -961,6 +971,11 @@ export default {
             margin-left:r(18);
           }
         }
+      }
+      .permanentdata{
+        width:100%;
+        height:r(102);
+        overflow:auto;
       }
       .permanent-content{
         width:100%;

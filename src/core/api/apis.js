@@ -10,15 +10,15 @@ var url2="/user/topic"
 
 class Apis {
     // cnode接口
-    // getTest01(){
-    //    return request({
-    //         method:"GET",
-    //         url:poxy+"/api/v1/topics",
-    //         headers:{
-    //             token:params.token
-    //         }
-    //     })
-    // }
+    getTest01(){
+       return request({
+            method:"GET",
+            url:poxy+"/api/v1/topics",
+            headers:{
+                token:params.token
+            }
+        })
+    }
 
     // 贝思客测试接口
     getTest02(){

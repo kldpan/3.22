@@ -2,7 +2,7 @@
   <div class="register">
     <!-- 第一层 -->
     <div class="top clearfix">
-      <div class="back fl"></div>
+      <div class="back fl" @click="toPath('/index/delivery')"></div>
       <div class="login fr" @click="toPath('/login')">登录</div>
     </div>
 

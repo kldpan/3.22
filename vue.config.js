@@ -11,26 +11,26 @@ module.exports = {
     port: 8899,
 
     // cnode代理
-    // proxy: {
-    //   "/apis": {
-    //     target: "https://cnodejs.org",
-    //     changeOrigin: true,
-    //     pathRewrite: {
-    //       "^/apis": ""
-    //     }
-    //   },
-    // },
-
-    // 贝思客代理
     proxy: {
       "/apis": {
-        target: "http://m.bestcake.com",
+        target: "https://cnodejs.org",
         changeOrigin: true,
         pathRewrite: {
           "^/apis": ""
         }
-      }
-    }
+      },
+    },
+
+    // 贝思客代理
+    // proxy: {
+    //   "/apis": {
+    //     target: "http://m.bestcake.com",
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       "^/apis": ""
+    //     }
+    //   }
+    // }
   },
   chainWebpack: config => {
     config.resolve.alias.set("@", resolve("src"));
