@@ -159,7 +159,7 @@ export default {
     },
     mounted(){
       this.currentPosition = this.$store.state.currentCity;
-      this.adMap();
+      // this.adMap();
       setTimeout(()=>{console.log(this.currentPosition);},1500)
       console.log(this);
     },

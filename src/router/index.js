@@ -99,6 +99,14 @@ const routes = [
           title: "隐私政策",
         }
       },
+      {
+        path: "loadmap",
+        name:"loadmap",
+        component: () => import("@/components/loadmap.vue"),
+        meta: {
+          title: "发货地址",
+        }
+      },
       // {
       //   path: "goodsInfo",
       //   name:"goodsInfo",

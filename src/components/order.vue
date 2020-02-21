@@ -106,6 +106,14 @@
 </template>
 
 <script>
+// import Vue from 'vue';
+// import AMap from 'vue-amap';
+// Vue.use(AMap);
+// AMap.initAMapApiLoader({
+//   key:'b04b292ba4b2140151e9c2bcd02bad0c',
+//   plugin:['AMap.Geolocation', 'AMap.Autocomplete', 'AMap.PlaceSearch', 'AMap.Scale', 'AMap.OverView', 'AMap.ToolBar', 'AMap.MapType', 'AMap.PolyEditor', 'AMap.CircleEditor', 'AMap.CitySearch']
+// });
+
 export default {
   data(){
     return{
@@ -118,12 +126,10 @@ export default {
       lng: 0,
       lat: 0,
       loaded: false,
-      // zoom:5,
       currentPosition:{},
       plugin: [{
         enableHighAccuracy: true,//是否使用高精度定位，默认:true
         timeout: 100,          //超过10秒后停止定位，默认：无穷大
-        // zoom:5,
         maximumAge: 0,           //定位结果缓存0毫秒，默认：0
         convert: true,           //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
         showButton: true,        //显示定位按钮，默认：true
@@ -141,26 +147,26 @@ export default {
               this.$nextTick();
               // 将当前定位信息放在this.current中（深度拷贝）
               this.currentPosition = JSON.parse(JSON.stringify(result));
-              // console.log(result.formattedAddress);
-              // var temp = {
-              //   province: res.province,
-              //   city: res.city,
-              //   district: res.district,
-              //   township: res.township,
-              //   street: res.street,
-              //   streetNumber:res.streetNumber,
-              //   currentCity:result.formattedAddress
-              // };
-              // self.$store.commit('getCurrentCity',temp);
-              // console.log(temp);
+              console.log(result.formattedAddress);
+              var temp = {
+                province: res.province,
+                city: res.city,
+                district: res.district,
+                township: res.township,
+                street: res.street,
+                streetNumber:res.streetNumber,
+                currentCity:result.formattedAddress
+              };
+              self.$store.commit('getCurrentCity',temp);
+              console.log(temp);
               
-              // if (result && result.position) {
-              //   self.lng = result.position.lng;
-              //   self.lat = result.position.lat;
-              //   self.center = [self.lng, self.lat];
-              //   self.loaded = true;
-              //   self.$nextTick();
-              // }
+              if (result && result.position) {
+                self.lng = result.position.lng;
+                self.lat = result.position.lat;
+                self.center = [self.lng, self.lat];
+                self.loaded = true;
+                self.$nextTick();
+              }
             });
           }
         }
@@ -169,16 +175,17 @@ export default {
   },
   mounted(){
     this.adMap();
-    setTimeout(()=>{console.log(this.currentPosition);},1500)
+    setTimeout(()=>{console.log(this.currentPosition);},1500);
     console.log(this);
 
   },
   methods:{
     // 初始化地图方法
     adMap(){
+      console.log(AMap);
       //初始化地图
       var map = new AMap.Map('container',{
-        zoom: 15,      //缩放级别
+        zoom: 18,      //缩放级别
         center: this.center, //设置地图中心点
         resizeEnable: true, //地图初始化加载定位到当前城市
       });

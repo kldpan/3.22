@@ -8,7 +8,7 @@
            <div class="sendIcon-n1">装</div>
          </div>
          <div class="send-n1-address fl"> 
-           <div class="send-n1-big-area" @click="toPath('/map')">{{current.status ? current.addressComponent.province + ' / ' + current.addressComponent.city : '填写城市 / 区域'}}</div>
+           <div class="send-n1-big-area" @click="toPath('/loadmap')">{{current.status ? current.addressComponent.province + ' / ' + current.addressComponent.city : '填写城市 / 区域'}}</div>
            <div class="send-n1-small-area">点击输入详地址</div>
          </div>
          <div class="sendMore-n1 fr">
@@ -310,15 +310,17 @@ export default {
   },
   mounted() {
     setTimeout(()=>{
-      // console.log(this.current);
+      console.log(this.current);
+      localStorage.setItem('current',JSON.stringify(this.current));
     },1000)
       
     this.$apis.getTest01().then((res) => {
-      // console.log(res.data.data);
       let resData = res.data.data;
       for(let i=0; i<resData.length; i++){
-        this.testData.push(resData[i]);
-        console.log(this.testData);
+        setTimeout(()=>{
+          this.testData.push(resData[i]);
+        },2000)
+        
       }
     });
 

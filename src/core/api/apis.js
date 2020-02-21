@@ -16,7 +16,7 @@ class Apis {
             url:poxy+"/api/v1/topics",
             headers:{
                 token:params.token
-            }
+            },
         })
     }
 
