@@ -8,7 +8,7 @@
            <div class="sendIcon-n1">装</div>
          </div>
          <div class="send-n1-address fl"> 
-           <div class="send-n1-big-area" @click="toPath('/loadmap')">{{current.status ? current.addressComponent.province + ' / ' + current.addressComponent.city : '填写城市 / 区域'}}</div>
+           <div class="send-n1-big-area" @click="toPath('/map')">{{current.status ? current.addressComponent.province + ' / ' + current.addressComponent.city : '填写城市 / 区域'}}</div>
            <div class="send-n1-small-area">点击输入详地址</div>
          </div>
          <div class="sendMore-n1 fr">

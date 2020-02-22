@@ -1,20 +1,4 @@
 <template>
-  <!-- <div class="amap-page-container">
-    <div :style="{width:'100%',height:'300px'}">
-      <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center">
-      </el-amap>
-    </div>
-
-
-    <div class="toolbar">
-      <span v-if="loaded">
-        当前位置：{{address}}
-      </span>
-      <span v-else>正在定位</span>
-    </div>
-    <div @click="req_post()">查询周边</div>
-  </div> -->
-
   <div class="mymap">
     <!-- 第一层搜索 -->
     <div class="search-area clearfix">
@@ -37,33 +21,64 @@
 
     <!-- 第二层地图 -->
     <div class="mapbox">
-      <div class="map" id="container"></div>
+      <div class="map" id="container" :plugin="plugin" vid="amap" :center="center"></div>
       <div class="sign"></div>
     </div>
 
     <!-- 第三层搜索列表 -->
     <div class="search-list" v-if="search_key">
+    <!-- <div class="search-list" v-if="search_list.length !== 0"> -->
       <ul>
-        <li v-for="(item,index) in search_list" :key="index" @click="onSearchLi(item.location)">
-          <span class="name">{{item.name}}</span>
-          <p class="address">{{item.address}}</p>
+        <li v-for="(item,index) in search_list" :key="index" @click="onSearchLi(item.location)" class="searchlist clearfix">
+          <span class="maplocationicon fl"></span>
+          <div class="searchaddressarea fl">
+            <div class="name">{{item.name}}</div>
+            <div class="address">{{item.address}}</div>
+          </div>
         </li>
-        <li v-if="noSearchShow">
-          <p>暂无搜索结果</p>
+        <li v-if="noSearchShow" class="nosearch">
+          <span>暂无搜索结果</span>
         </li>
       </ul>
     </div>
+    
     <!-- 搜索输入获取焦点时显示 -->
     <div class="records" v-if="bool">
-      <ul>
-        <li class="tomap">
+      <ul class="upul">
+        <li class="tomap" @click="toMap()">
           <span class="maplocationicon"></span>
-          <span>去地图上选点</span>
+          <span class="maptpaddress">去地图上选点</span>
         </li>
         <li class="currentposition">
-          <span class="currentcity">{{111}}</span>
+          <span class="maplocationicon fl"></span>
+          <div class="addressarea fl">
+            <div class="roughaddressarea">
+              <span class="roughaddress">{{'大地址'}}</span>
+              <span class="notice">当前</span>
+            </div>
+            <div class="detailedaddress">{{'小地址小地址小地址小地址小地址小地址小地址'}}</div>
+          </div>
         </li>
-      </ul>  
+      </ul>
+
+      <div class="historypart" v-if="testData.length !== 0">
+        <div class="historytitle clearfix">
+          <span class="title fl">历史记录：</span>
+          <span class="deleteicon fr"></span>
+        </div>
+        <ul class="historyarea">
+          <li v-for="(item,index) in testData" :key="index">
+            <span class="maplocationicon fl"></span>
+            <div class="addressarea fl">
+              <div class="roughaddressarea">
+                <span class="roughaddress">{{item.title.slice(0,4)}}</span>
+              </div>
+              <div class="detailedaddress">{{item.title.slice(0,18)}}</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
     </div>
 
     <!-- 第四层信息 -->
@@ -81,7 +96,7 @@
       </div>
 
       <!-- 第三层 -->
-      <div class="floor-n3">
+      <div class="floor-n3 clearfix">
         <div class="sender fl">
           <span class="senderIcon"></span>
           <input class="sendername" placeholder="联系人">
@@ -89,7 +104,7 @@
         <div class="phone fl">
           <span class="phoneIcon"></span>
           <input class="phonenumber" placeholder="联系电话">
-          <span class="contacts">通信录</span>
+          <!-- <span class="contacts">通信录</span> -->
         </div>
       </div>
 
@@ -106,34 +121,32 @@
 </template>
 
 <script>
-// import Vue from 'vue';
-// import AMap from 'vue-amap';
-// Vue.use(AMap);
-// AMap.initAMapApiLoader({
-//   key:'b04b292ba4b2140151e9c2bcd02bad0c',
-//   plugin:['AMap.Geolocation', 'AMap.Autocomplete', 'AMap.PlaceSearch', 'AMap.Scale', 'AMap.OverView', 'AMap.ToolBar', 'AMap.MapType', 'AMap.PolyEditor', 'AMap.CircleEditor', 'AMap.CitySearch']
-// });
 
 export default {
   data(){
+    const self = this;
     return{
-      center: [106.532357,29.57212],        //纬度-经度
+      currentPosition:{},                   //定位全部数据
       search_key: '',                       //搜索值
       search_list: [],                      //搜索结果列表
       noSearchShow: false,                  //无搜索结果提示，无搜索结果时会显示暂无搜索结果
       detailedAddress:'',
-      bool: false,                          //bool值控制搜索得焦后出现的页面 
+      bool: false,                          //bool值控制搜索得焦后出现的页面
+      testData:[],
+
+      // 地图数据 ↓
+      // center: [121.59996, 31.197646],
+      center: [106.532357,29.57212],        //纬度-经度
       lng: 0,
       lat: 0,
       loaded: false,
-      currentPosition:{},
       plugin: [{
         enableHighAccuracy: true,//是否使用高精度定位，默认:true
         timeout: 100,          //超过10秒后停止定位，默认：无穷大
         maximumAge: 0,           //定位结果缓存0毫秒，默认：0
         convert: true,           //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
         showButton: true,        //显示定位按钮，默认：true
-        buttonPosition: 'RB',    //定位按钮停靠位置，默认：'LB'，左下角
+        buttonPosition: 'LT',    //定位按钮停靠位置，默认：'LB'，左下角
         showMarker: true,        //定位成功后在定位到的位置显示点标记，默认：true
         showCircle: true,        //定位成功后用圆圈表示定位精度范围，默认：true
         panToLocation: true,     //定位成功后将定位到的位置作为地图中心点，默认：true
@@ -144,54 +157,65 @@ export default {
           init(o) {
             // o 是高德地图定位插件实例
             o.getCurrentPosition((status, result) => {
-              this.$nextTick();
-              // 将当前定位信息放在this.current中（深度拷贝）
-              this.currentPosition = JSON.parse(JSON.stringify(result));
-              console.log(result.formattedAddress);
-              var temp = {
-                province: res.province,
-                city: res.city,
-                district: res.district,
-                township: res.township,
-                street: res.street,
-                streetNumber:res.streetNumber,
-                currentCity:result.formattedAddress
-              };
-              self.$store.commit('getCurrentCity',temp);
-              console.log(temp);
-              
-              if (result && result.position) {
-                self.lng = result.position.lng;
-                self.lat = result.position.lat;
-                self.center = [self.lng, self.lat];
-                self.loaded = true;
-                self.$nextTick();
-              }
+              console.log('test');
+              // if (result && result.position) {
+              //   self.lng = result.position.lng;
+              //   self.lat = result.position.lat;
+              //   self.center = [self.lng, self.lat];
+              //   self.loaded = true;
+              //   self.$nextTick();
+              // }
+
+              // // 将当前定位信息放在this.current中（深度拷贝）
+              // self.currentPosition = JSON.parse(JSON.stringify(result));
+              // // 声明模板数据，将数据存入vuex中
+              // var temp = {
+              //   province: res.province,
+              //   city: res.city,
+              //   district: res.district,
+              //   township: res.township,
+              //   street: res.street,
+              //   streetNumber:res.streetNumber,
+              //   currentCity:result.formattedAddress
+              // };
+              // self.$store.commit('getCurrentCity',temp);
+
             });
           }
         }
       }]
+
+      // 地图数据 ↑
+      
     }
   },
   mounted(){
     this.adMap();
-    setTimeout(()=>{console.log(this.currentPosition);},1500);
-    console.log(this);
+    // setTimeout(()=>{console.log(this.currentPosition);},1500);
+
+    this.$apis.getTest01().then((res) => {
+      let resData = res.data.data;
+      for(let i=0; i<resData.length; i++){
+        setTimeout(()=>{
+          this.testData.push(resData[i]);
+        },2000)
+      }
+    });
 
   },
   methods:{
     // 初始化地图方法
     adMap(){
-      console.log(AMap);
+      // console.log(AMap);
       //初始化地图
       var map = new AMap.Map('container',{
         zoom: 18,      //缩放级别
-        center: this.center, //设置地图中心点
+        // center: this.center, //设置地图中心点
+        center: [106.532357,29.57212],
         resizeEnable: true, //地图初始化加载定位到当前城市
       });
       //获取初始中心点并赋值
       var currentCenter = map.getCenter();//此方法是获取当前地图的中心点
-      console.log(currentCenter);
       this.center = [currentCenter.lng,currentCenter.lat];//将获取到的中心点的纬度经度赋值给data的center
       //根据地图中心点查附近地点，此方法在下方
       this.centerSearch();
@@ -264,6 +288,12 @@ export default {
     },
     back(){
       this.$router.go(0);
+    },
+    toMap(){
+      this.bool = false;
+    },
+    toPath(url){
+      this.$router.push(url);
     },
     getRecord(){
       this.bool = true;
@@ -413,22 +443,213 @@ export default {
     // 搜索列表层
     .search-list{
       width:100%;
-      height: r(1470);
+      height: r(1244);
       position:absolute;
       background: #fff; 
       z-index: 1000000;
       left:0;
       top:r(88);
-      
+      // overflow:auto;
+      ul{
+        width:100%;
+        height:r(1244);
+        overflow:auto;
+        // 搜索列表
+        .searchlist{
+          width:r(690);
+          height:r(98);
+          margin:0 auto;
+          border-bottom:1px solid rgba(198,198,198,0.3);
+          .maplocationicon{
+            display:inline-block;
+            width:r(27);
+            height:r(33);
+            background:url(../assets/address.png) no-repeat;
+            background-size:r(27) r(33);
+            vertical-align:middle;
+            margin:r(33) 0 r(32) 0;
+          }
+          .searchaddressarea{
+            width:r(635);
+            height:r(98);
+            overflow:hidden;
+            margin-left:r(24);
+            .name{
+              width:r(635);
+              height:r(49);
+              line-height:r(49);
+              font-size:r(28);
+              color:#333;
+            }
+            .address{
+              width:r(635);
+              height:r(49);
+              line-height:r(49);
+              color:#999;
+              overflow:hidden;
+            }
+          }
+        }
+        // 暂无搜索结果
+        .nosearch{
+          width:100%;
+          height:r(1244);
+          display:flex;
+          span{
+            margin:auto;
+          }
+        }
+      }
+
     }
+
+    // 获焦暂无搜索
     .records{
       width:100%;
       height: r(1246);
       position:absolute;
       background: #fff; 
-      z-index: 100000000000000000000000;
+      z-index: 100000;
       left:0;
       top:r(88);
+      // 地图选点和当前位置
+      .upul{
+        width:100%;
+        height:r(197);
+        li{
+          width:r(690);
+          height:r(98);
+          margin:0 auto;
+        }
+        .tomap{
+          border-bottom:1px solid rgba(198,198,198,0.3);
+          .maplocationicon{
+            display:inline-block;
+            width:r(27);
+            height:r(33);
+            background:url(../assets/address.png) no-repeat;
+            background-size:r(27) r(33);
+            vertical-align:middle;
+          }
+          .maptpaddress{
+            // vertical-align:middle;
+            line-height:r(98);
+            margin-left:r(24);
+            color:#333;
+            font-size:r(30);
+          }
+        }
+        .currentposition{
+          .maplocationicon{
+            display:inline-block;
+            width:r(27);
+            height:r(33);
+            background:url(../assets/address.png) no-repeat;
+            background-size:r(27) r(33);
+            vertical-align:middle;
+            margin-top:r(33);
+          }
+          .addressarea{
+            margin-left:r(24);
+            width:r(635);
+            height:r(98);
+            .roughaddressarea{
+              width:r(595);
+              height:r(49);
+              line-height:r(49);
+              .roughaddress{
+                font-size:r(28);
+                color:#333;
+              }
+              .notice{
+                display:inline-block;
+                width:r(66);
+                height:r(36);
+                border:1px solid rgba(3,80,160,0.3);
+                border-radius:r(6);
+                color:#0350A0;
+                text-align:center;
+                line-height:r(36);
+                // vertical-align:middle;
+                margin-left:r(18);
+              }
+            }
+            .detailedaddress{
+              width:r(595);
+              height:r(49);
+              line-height:r(49);
+              color:#999;
+              overflow:hidden;
+            }
+          }
+        }
+      }
+      // 历史记录
+      .historypart{
+        width:100%;
+        height:r(1048);
+        background:#F2F6F7;
+        .historytitle{
+          width:100%;
+          height:r(82);
+          .title{
+            color:#666;
+            font-size:r(30);
+            margin:r(26) 0 0 r(30);
+          }
+          .deleteicon{
+            display:block;
+            width:r(28);
+            height:r(30);
+            background:url(../assets/delete.png) no-repeat;
+            background-size:r(28) r(30);
+            margin:r(26) r(30) r(26) 0;
+          }
+        }
+        .historyarea{
+          width:100%;
+          height:r(966);
+          overflow:auto;
+          background:#fff;
+          li{
+            width:r(690);
+            height:r(98);
+            margin:0 auto;
+            border-bottom:1px solid rgba(198,198,198,0.3);
+            .maplocationicon{
+              display:inline-block;
+              width:r(27);
+              height:r(33);
+              background:url(../assets/address.png) no-repeat;
+              background-size:r(27) r(33);
+              vertical-align:middle;
+              margin-top:r(33);
+            }
+            .addressarea{
+              margin-left:r(24);
+              width:r(635);
+              height:r(98);
+              .roughaddressarea{
+                width:r(635);
+                height:r(49);
+                line-height:r(49);
+                .roughaddress{
+                  font-size:r(28);
+                  color:#333;
+                }
+              }
+              .detailedaddress{
+                width:r(635);
+                height:r(49);
+                line-height:r(49);
+                color:#999;
+                overflow:hidden;
+              }
+            }
+          }
+        }
+      }
+
     }
     
 
@@ -443,6 +664,117 @@ export default {
       bottom:r(30);
       z-index: 10000;
       box-shadow:0px 3px 20px rgba(0,0,0,0.16);
+      .floor-n1{
+        width:r(650);
+        height:r(88);
+        margin:0 auto;
+        border-bottom:1px solid rgba(198,198,198,0.3);
+        .loadIcon{
+          display:inline-block;
+          width:r(32);
+          height:r(32);
+          background:#0350A0;
+          color:#fff;
+          border-radius:50%;
+          line-height:r(30);
+          text-align:center;
+          font-size:r(20);
+          margin-top:r(28);
+        }
+        .title{
+          vertical-align:middle;
+          line-height:r(88);
+          margin-left:r(20);
+          font-size:r(30);
+          color:#333;
+        }
+      }
+      .floor-n2{
+        width:r(650);
+        height:r(88);
+        margin:0 auto;
+        border-bottom:1px solid rgba(198,198,198,0.3);
+        // overflow:hidden;
+        .locationIcon{
+          width:r(27);
+          height:r(33);
+          display:inline-block;
+          background:url(../assets/address.png) no-repeat;
+          background-size:r(27) r(33);
+          vertical-align:middle;
+        }
+        input{
+          border:none;
+          line-height:r(88);
+          margin-left:r(20);
+          width:r(600);
+          height:r(84);
+          vertical-align:middle;
+        }
+      }
+      .floor-n3{
+        width:r(650);
+        height:r(88);
+        margin:0 auto;
+        border-bottom:1px solid rgba(198,198,198,0.3);
+        .sender{
+          width:r(325);
+          height:r(88);
+          .senderIcon{
+            width:r(29);
+            height:r(33);
+            display:inline-block;
+            background:url(../assets/lightmine.png) no-repeat;
+            background-size:r(29) r(33);
+            vertical-align:middle;
+          }
+          .sendername{
+            border:none;
+            line-height:r(88);
+            margin-left:r(20);
+            width:r(275);
+            height:r(84);
+            vertical-align:middle;
+          }
+        }
+        .phone{
+          width:r(325);
+          height:r(88);
+          .phoneIcon{
+            width:r(29);
+            height:r(33);
+            display:inline-block;
+            background:url(../assets/lightphone.png) no-repeat;
+            background-size:r(29) r(33);
+            vertical-align:middle;
+          }
+          .phonenumber{
+            border:none;
+            line-height:r(88);
+            margin-left:r(20);
+            width:r(275);
+            height:r(84);
+            vertical-align:middle;
+          }
+        }
+      }
+      .submit{
+        width:r(650);
+        height:r(127);
+        margin:0 auto;
+        display:flex;
+        .subbtn{
+          margin:auto;
+          width:r(300);
+          height:r(86);
+          background:#0350A0;
+          border-radius:r(43);
+          line-height:r(86);
+          text-align:center;
+          color:#fff;
+          font-size:r(32);
+        }
+      }
     }    
   }
 </style>

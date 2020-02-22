@@ -11,7 +11,7 @@
       </div>
       <div class="icons fr">
         <span class="voiceIcon"></span>
-        <span class="bigCity">bigCity</span>
+        <span class="bigCity">BIGCITY</span>
         <span class="popup"></span>
       </div>
       
@@ -131,7 +131,7 @@ export default {
             init(o) {
               // o 是高德地图定位插件实例
               o.getCurrentPosition((status, result) => {
-                // console.log(result);
+                console.log(result);
                 // console.log(result.formattedAddress);
                 // let res = result.addressComponent;
                 // let temp = {
@@ -158,6 +158,7 @@ export default {
       }
     },
     mounted(){
+      this.adMap();
       this.currentPosition = this.$store.state.currentCity;
       // this.adMap();
       setTimeout(()=>{console.log(this.currentPosition);},1500)
@@ -205,6 +206,7 @@ export default {
             if(status == 'complete'){
               this.lists = result.poiList.pois//将查询到的地点赋值
               console.log(result);
+              console.log(11111)
             }
           });
         });
