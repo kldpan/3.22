@@ -44,6 +44,14 @@ const routes = [
         }
       },
       {
+        path: "waitfororders",
+        name:"waitfororders",
+        component: () => import("@/components/delivery/waitfororders.vue"),
+        meta: {
+          title: "等待接单",
+        }
+      },
+      {
         path: "order",
         name:"order",
         component: () => import("@/components/order.vue"),
@@ -142,7 +150,7 @@ const routes = [
       {
         path: "noteinfos",
         name:"noteinfos",
-        component: () => import("@/components/noteinfos.vue"),
+        component: () => import("@/components/delivery/noteinfos.vue"),
         meta: {
           title: "备注信息",
         }

@@ -13,6 +13,10 @@ import "mint-ui/lib/style.css"
 import vueWechatTitle from "vue-wechat-title"
 import coreConfig from "@/core/core.config.js"
 
+import 'iview/dist/styles/iview.css'
+import {Upload} from 'iview';
+Vue.component('Upload', Upload);
+
 Vue.use(vueWechatTitle);
 Vue.use(coreConfig);//fn(){}
 
