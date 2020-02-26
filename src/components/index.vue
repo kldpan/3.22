@@ -20,7 +20,7 @@
   <div class="tab">
 
     <!-- 消息 -->
-    <div class="news fl"></div>
+    <div class="news fl" @click="toPath('/message')"></div>
 
     <!-- 中间切换 -->
     <div class="tabbox fl">
@@ -33,7 +33,7 @@
     </div>
 
     <!-- 活动 -->
-    <div class="activity fr"></div>
+    <div class="activity fr" @click="toPath('/activitynews')"></div>
   </div>
 
 </div>

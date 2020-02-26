@@ -36,11 +36,27 @@ const routes = [
         redirect: "index/delivery"
       },
       {
+        path: "deliverydetails",
+        name:"deliverydetails",
+        component: () => import("@/components/delivery/deliverydetails.vue"),
+        meta: {
+          title: "运单详情",
+        }
+      },
+      {
         path: "order",
         name:"order",
         component: () => import("@/components/order.vue"),
         meta: {
           title: "我的订单",
+        }
+      },
+      {
+        path: "logout",
+        name:"logout",
+        component: () => import("@/components/mine/logout.vue"),
+        meta: {
+          title: "登录页",
         }
       },
       {
@@ -105,6 +121,62 @@ const routes = [
         component: () => import("@/components/loadmap.vue"),
         meta: {
           title: "发货地址",
+        }
+      },
+      {
+        path: "unloadmap",
+        name:"unloadmap",
+        component: () => import("@/components/unloadmap.vue"),
+        meta: {
+          title: "卸货地址",
+        }
+      },
+      {
+        path: "canceldelivery",
+        name:"canceldelivery",
+        component: () => import("@/components/canceldelivery.vue"),
+        meta: {
+          title: "取消货源",
+        }
+      },
+      {
+        path: "noteinfos",
+        name:"noteinfos",
+        component: () => import("@/components/noteinfos.vue"),
+        meta: {
+          title: "备注信息",
+        }
+      },
+      {
+        path: "activitynews",
+        name:"activitynews",
+        component: () => import("@/components/activity/activitynews.vue"),
+        meta: {
+          title: "活动消息",
+        }
+      },
+      {
+        path: "activity",
+        name:"activity",
+        component: () => import("@/components/activity/activity.vue"),
+        meta: {
+          title: "活动拉新",
+        }
+      },
+      {
+        path: "message",
+        name:"message",
+        component: () => import("@/components/notice/message.vue"),
+        meta: {
+          title: "消息中心",
+        }
+      },
+      {
+        path: "settingnews",
+        name:"settingnews",
+        component: () => import("@/components/notice/settingnews.vue"),
+        meta: {
+          title: "消息设置",
         }
       },
       // {

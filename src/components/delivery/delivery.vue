@@ -8,7 +8,7 @@
            <div class="sendIcon-n1">装</div>
          </div>
          <div class="send-n1-address fl"> 
-           <div class="send-n1-big-area" @click="toPath('/map')">{{current.status ? current.addressComponent.province + ' / ' + current.addressComponent.city : '填写城市 / 区域'}}</div>
+           <div class="send-n1-big-area" @click="toPath('/loadmap')">{{current.status ? current.addressComponent.province + ' / ' + current.addressComponent.city : '填写城市 / 区域'}}</div>
            <div class="send-n1-small-area">点击输入详地址</div>
          </div>
          <div class="sendMore-n1 fr">
@@ -36,7 +36,7 @@
            <div class="receiveIcon-n1">卸</div>
          </div>
          <div class="receive-n1-address fl">
-           <div class="receive-n1-big-area">填写城市/区域</div>
+           <div class="receive-n1-big-area" @click="toPath('/unloadmap')">填写城市/区域</div>
            <div class="receive-n1-small-area">点击输入详地址</div>
          </div>
          <div class="receiveMore-n1 fr">
@@ -116,7 +116,7 @@
     </div> -->
 
     <!-- 第三层 -->
-    <div class="publish">
+    <div class="publish" @click="publish()">
       <button>发布</button>
     </div>
 
@@ -397,13 +397,17 @@ export default {
       this.userSelectLoadWay = '';
       this.num = 0;
     },
-    // getMapLocation(){
-    //   // AMap是高德地图的构造函数，这里.Map是创建地图
-    //   let mapObj = new AMap.Map('map-location',{        //'map-location'是对应页面盒子的id
-    //     resizeEnable: true,                             //自适应大小
-    //     zoom: 13                                        //初始窗口的大小
-    //   })
-    // }
+    publish(){
+      this.$router.push({
+        path:'/deliverydetails',
+        query:{
+          loadAddress:111,
+          unLoadAddress:222,
+          length:333,
+          loadway:444,
+        }
+      })
+    }
   }
 };
 </script>

@@ -85,8 +85,8 @@
     <div class="senderInfo">
       <!-- 第一层 -->
       <div class="floor-n1">
-        <span class="loadIcon">装</span>
-        <span class="title">发货人信息</span>  
+        <span class="loadIcon">卸</span>
+        <span class="title">收货人信息</span>  
       </div>
 
       <!-- 第二层 -->
@@ -673,7 +673,7 @@ export default {
           display:inline-block;
           width:r(32);
           height:r(32);
-          background:#0350A0;
+          background:#F28312;
           color:#fff;
           border-radius:50%;
           line-height:r(30);
@@ -767,7 +767,7 @@ export default {
           margin:auto;
           width:r(300);
           height:r(86);
-          background:#0350A0;
+          background:#F28312;
           border-radius:r(43);
           line-height:r(86);
           text-align:center;
