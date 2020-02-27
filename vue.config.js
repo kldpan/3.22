@@ -5,7 +5,7 @@ function resolve(dir) {
 }
 
 module.exports = {
-  publicPath: "./",
+  // publicPath: "./",
   devServer: {
     host: "0.0.0.0",
     port: 8899,
@@ -13,7 +13,7 @@ module.exports = {
     // cnode代理
     proxy: {
       "/apis": {
-        target: "https://cnodejs.org",
+        target: "",
         changeOrigin: true,
         pathRewrite: {
           "^/apis": ""

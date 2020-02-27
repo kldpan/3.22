@@ -5,6 +5,7 @@ var poxy="/apis"
 var url1="/index"
 var url2="/user/topic"
 // var url3="/json1811.ashx"
+var url4="/api/goodssource"
 
 
 
@@ -32,6 +33,11 @@ class Apis {
              }
          })
      }
+
+
+    //  后端接口测试
+    
+
 
     // getTopic(){
     //     return request({

@@ -313,7 +313,8 @@ export default {
       console.log(this.current);
       localStorage.setItem('current',JSON.stringify(this.current));
     },1000)
-      
+    
+    // cnode数据
     this.$apis.getTest01().then((res) => {
       let resData = res.data.data;
       for(let i=0; i<resData.length; i++){
@@ -323,6 +324,12 @@ export default {
         
       }
     });
+
+    // 后端接口数据
+    this.$apis.getTest03().then((res)=>{
+      console.log(res);
+    })
+
 
     // this.currentLocation = JSON.parse(JSON.stringify(this.$store.state.currentCity));
     // console.log(this.$store.state.currentCity);

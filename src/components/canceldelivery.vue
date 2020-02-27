@@ -2,7 +2,7 @@
   <div class="canceldelivery">
     <!-- 第一层 -->
     <div class="title">
-        <span class="back"></span>
+        <span class="back" @click="go(-1)"></span>
         <span class="titlename">取消货源</span>
     </div>
 
@@ -10,6 +10,7 @@
     <div class="body">
       <span class="notice">您的货源已成功取消</span>
     </div>
+
   </div>
 </template>
 
@@ -18,6 +19,11 @@ export default {
   data(){
     return {
 
+    }
+  },
+  methods:{
+    go(n){
+      this.$router.go(n);
     }
   }
 };
