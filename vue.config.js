@@ -13,7 +13,7 @@ module.exports = {
     // cnode代理
     proxy: {
       "/apis": {
-        target: "",
+        target: "https://cnodejs.org",
         changeOrigin: true,
         pathRewrite: {
           "^/apis": ""
