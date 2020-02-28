@@ -131,7 +131,7 @@
       </div>
       <div class="permanentdata" v-if="testData.length !== 0">
         <ul>
-          <li v-for="(item,index) in testData" :key="index">{{item.title}}</li>
+          <li v-for="(item,index) in testData" :key="index">{{item.id}}</li>
         </ul>
       </div>
       <div class="permanent-content" v-else="testData.length === 0">
@@ -321,13 +321,18 @@ export default {
         setTimeout(()=>{
           this.testData.push(resData[i]);
         },2000)
-        
       }
     });
 
     // 后端接口数据
     this.$apis.getTest03().then((res)=>{
-      console.log(res);
+      console.log(res.data.data);
+      let resData = res.data.data;
+      for(let i=0; i<resData.length; i++){
+        setTimeout(()=>{
+          this.testData.push(resData[i]);
+        },2000)
+      }
     })
 
 

@@ -36,7 +36,15 @@ class Apis {
 
 
     //  后端接口测试
-    
+    getTest03(){
+        return request({
+             method:"GET",
+             url:"http://192.168.0.109" + '/api/goodssource',
+             params:{
+                 
+             }
+         })
+     }
 
 
     // getTopic(){
