@@ -206,7 +206,7 @@
 
     <!-- 定位（不出现地图，直接定位） -->
     <div class="amap-page-container">
-      <div :style="{width:'0px',height:'0px'}">
+      <div :style="{width:'100%',height:'100px'}">
         <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center">
         </el-amap>
       </div>
@@ -252,13 +252,12 @@ export default {
       userCarType:[],
       current:{},
       testData:[],
-
+      currentPosition:'',
 
       center: [121.59996, 31.197646],
       lng: 0,
       lat: 0,
       loaded: false,
-      currentPosition:'',
       plugin: [{
         enableHighAccuracy: true,//是否使用高精度定位，默认:true
         timeout: 100,          //超过10秒后停止定位，默认：无穷大
@@ -309,6 +308,9 @@ export default {
     }
   },
   mounted() {
+
+    console.log(this.current);
+
     setTimeout(()=>{
       console.log(this.current);
       localStorage.setItem('current',JSON.stringify(this.current));

@@ -82,7 +82,7 @@
     </div>
 
     <!-- 第四层信息 -->
-    <div class="senderInfo">
+    <div class="senderInfo" ref="senderInfo">
       <!-- 第一层 -->
       <div class="floor-n1">
         <span class="loadIcon">装</span>
@@ -92,7 +92,7 @@
       <!-- 第二层 -->
       <div class="floor-n2">
         <span class="locationIcon"></span>
-        <input type="text" placeholder="详细地址（精确到门牌号）" v-model="detailedAddress">
+        <input type="text" placeholder="详细地址（精确到门牌号）" v-model="detailedAddress" >
       </div>
 
       <!-- 第三层 -->
@@ -109,12 +109,21 @@
       </div>
 
       <!-- 第四层 -->
-      <div class="submit">
+      <div class="submit" @click="toUnloadMap()">
         <div class="subbtn">确定</div>
       </div>
 
 
     </div>
+
+    <div class="amap-page-container">
+      <div :style="{width:'0',height:'0px'}">
+        <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center">
+        </el-amap>
+      </div>
+    </div>
+
+
 
   </div>
 
@@ -133,6 +142,7 @@ export default {
       detailedAddress:'',
       bool: false,                          //bool值控制搜索得焦后出现的页面
       testData:[],
+      dragAddress:[],
 
       // 地图数据 ↓
       // center: [121.59996, 31.197646],
@@ -157,7 +167,7 @@ export default {
           init(o) {
             // o 是高德地图定位插件实例
             o.getCurrentPosition((status, result) => {
-              console.log('test');
+              console.log(result);
               // if (result && result.position) {
               //   self.lng = result.position.lng;
               //   self.lat = result.position.lat;
@@ -189,9 +199,10 @@ export default {
       
     }
   },
-  mounted(){
+  async mounted(){
     this.adMap();
-    // setTimeout(()=>{console.log(this.currentPosition);},1500);
+    console.log(AMap);
+    // this.dragMapAddressToDetails();
 
     this.$apis.getTest01().then((res) => {
       let resData = res.data.data;
@@ -209,7 +220,7 @@ export default {
       // console.log(AMap);
       //初始化地图
       var map = new AMap.Map('container',{
-        zoom: 18,      //缩放级别
+        zoom: 19,      //缩放级别
         // center: this.center, //设置地图中心点
         center: [106.532357,29.57212],
         resizeEnable: true, //地图初始化加载定位到当前城市
@@ -246,6 +257,8 @@ export default {
           if(status == 'complete'){
             this.lists = result.poiList.pois//将查询到的地点赋值
             console.log(result);
+            this.dragAddress = this.lists;
+            this.dragMapAddressToDetails();
           }
         });
       });
@@ -280,6 +293,7 @@ export default {
         });
       });
     },
+
     // 点击搜索结果方法
     onSearchLi(location){
       this.center = [location.lng,location.lat];
@@ -307,6 +321,21 @@ export default {
         this.clearSearch();
       }
 
+    },
+    toUnloadMap(){
+      this.toPath('/unloadmap');
+      let senderInfo = {
+        senderAddress:'',
+        senderName:'',
+        senderPhone:''
+      }
+      localStorage.setItem('senderInfo',senderInfo);
+    },
+
+    // 拖动地址改变内容
+    dragMapAddressToDetails(){
+      // console.log(this.$refs.senderInfo.children[1].children[1].value);
+      this.$refs.senderInfo.children[1].children[1].value = this.dragAddress[0].address;
     }
   },
   watch: {
