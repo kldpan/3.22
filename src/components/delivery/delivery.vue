@@ -275,6 +275,7 @@ export default {
           init(o) {
             // o 是高德地图定位插件实例
             o.getCurrentPosition((status, result) => {
+              console.log(result);
               self.$nextTick();
               // 将当前定位信息放在this.current中（深度拷贝）
               self.current = JSON.parse(JSON.stringify(result));
