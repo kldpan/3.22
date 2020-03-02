@@ -6,79 +6,81 @@
         <div class="titlename fl">运单详情</div>
     </div>
 
-    <!-- 第二层 -->
-    <div class="size" ref="size">
-        <div class="weight clearfix">
-            <span class="name">货物重量</span>
-            <span class="unit fr">吨</span>
-            <input type="number" placeholder="填写大于0吨" @blur="userInputWeight()"/>
+    <div class="body">
+        <!-- 第二层 -->
+        <div class="size" ref="size">
+            <div class="weight clearfix">
+                <span class="name">货物重量</span>
+                <span class="unit fr">吨</span>
+                <input type="number" placeholder="填写大于0吨" @blur="userInputWeight()"/>
+            </div>
+            <div class="volume clearfix">
+                <span class="name">货物体积</span>
+                <span class="unit fr">方</span>
+                <input type="number"  placeholder="填写大于0方" @blur="userInputVolume()"/>
+            </div>
         </div>
-        <div class="volume clearfix">
-            <span class="name">货物体积</span>
-            <span class="unit fr">方</span>
-            <input type="number"  placeholder="填写大于0方" @blur="userInputVolume()"/>
-        </div>
-    </div>
 
-    <!-- 第三层 -->
-    <div class="goodtype">
-        <div class="name">货物类型</div>
-        <div class="typeoptions">
-            <ul class="clearfix">
-                <li v-for="(item,index) in goodTypeList" :key="index" :class="goodTypeNum === index ? 'selectedtype fl' : 'othertype fl'" @click="selectGoodType(item,index)">{{item}}</li>
-            </ul>
+        <!-- 第三层 -->
+        <div class="goodtype">
+            <div class="name">货物类型</div>
+            <div class="typeoptions">
+                <ul class="clearfix">
+                    <li v-for="(item,index) in goodTypeList" :key="index" :class="goodTypeNum === index ? 'selectedtype fl' : 'othertype fl'" @click="selectGoodType(item,index)">{{item}}</li>
+                </ul>
+            </div>
+            <div class="inputtype">
+                <div class="othergood">其他物品</div>
+                <div class="inputbox" ref="goodname">
+                    <input type="text" placeholder="请输入其他物品名称" @blur="userInputGoodName()"/>
+                </div>
+            </div>
         </div>
-        <div class="inputtype">
-            <div class="othergood">其他物品</div>
-            <div class="inputbox" ref="goodname">
-                <input type="text" placeholder="请输入其他物品名称" @blur="userInputGoodName()"/>
+
+        <!-- 第四层 -->
+        <div class="loadtimeandcartype">
+            <div class="loadtime" @click="openPicker">
+                <span class="name">装货时间</span>
+                <span class="notice">选择装货时间</span>
+                <span class="more"></span>
+            </div>
+            <div class="cartype" @click="carTypeModalShow()">
+                <span class="name">车型车长</span>
+                <span class="notice">非必选项</span>
+                <span class="more"></span>
+            </div>
+        </div>
+
+        <!-- 第五层 -->
+        <div class="paywayandnote">
+            <div class="payway" @click="payWayModalShow()">
+                <span class="name">付款方式</span>
+                <span class="notice">选择付款方式</span>
+                <span class="more"></span>
+            </div>
+            <div class="note" @click="toPath('/noteinfos')">
+                <span class="name">备注</span>
+                <span class="notice">备注信息</span>
+                <span class="more"></span>
+            </div>
+        </div>
+
+        <!-- 第六层 -->
+        <div class="topermanent">
+            <div class="mycheck">
+                <input type="checkbox"/>
+                <span>是否存为常发货源</span>
             </div>
         </div>
     </div>
-
-    <!-- 第四层 -->
-    <div class="loadtimeandcartype">
-        <div class="loadtime" @click="openPicker">
-            <span class="name">装货时间</span>
-            <span class="notice">选择装货时间</span>
-            <span class="more"></span>
-        </div>
-        <div class="cartype" @click="carTypeModalShow()">
-            <span class="name">车型车长</span>
-            <span class="notice">非必选项</span>
-            <span class="more"></span>
-        </div>
-    </div>
-
-    <!-- 第五层 -->
-    <div class="paywayandnote">
-        <div class="payway" @click="payWayModalShow()">
-            <span class="name">付款方式</span>
-            <span class="notice">选择付款方式</span>
-            <span class="more"></span>
-        </div>
-        <div class="note" @click="toPath('/noteinfos')">
-            <span class="name">备注</span>
-            <span class="notice">备注信息</span>
-            <span class="more"></span>
-        </div>
-    </div>
-
-    <!-- 第六层 -->
-    <div class="topermanent">
-        <div class="mycheck">
-            <input type="checkbox"/>
-            <span>是否存为常发货源</span>
-        </div>
-        
-        
-    </div>
+    
 
     <!-- 底层 -->
-    <div class="bottom">
+    <!-- 原来 -->
+    <!-- <div class="bottom clearfix">
         <span class="price">{{price || '填写重量或者体积后显示运费'}}</span>
         <span class="publish" @click="confirm()">发货</span>
-    </div>
+    </div> -->
 
 
     <!-- 时间选择器mint部分 -->
@@ -148,6 +150,74 @@
         </div>
     </div>
     
+    <div class="bottom clearfix">
+        <!-- 更改 -->
+        <div class="uparea">
+            <!-- 无价格时左 -->
+            <div class="noinput fl" v-if="priceData.length === 0">
+                <div class="noticearea">
+                    <div>填写重量/体积</div>
+                    <div>显示运费</div>
+                </div>
+            </div>
+            <!-- 有价格时左 -->
+            <div class="autoprice fl" v-else="priceData.length !== 0">
+                <div class="totalprice">
+                    <input type="radio"/>
+                    <span>{{'¥0.00'}}</span>
+                </div>
+                <div class="averageprice">每吨约{{0}}元</div>
+                <div class="length">运距约{{0}}公里</div>
+            </div>
+            <!-- 用户未输入时右 -->
+            <div class="userpricenotice fr" v-if="!userInputPrice">
+                <div class="selectarea">
+                    <input type="radio"/>
+                    <span>自己报价</span>
+                </div>
+            </div>
+            <!-- 用户输入时右 -->
+            <div class="userpriceshow fr" v-else="userInputPrice">
+                <div class="userprice">
+                    <div class="pricearea">
+                        <input type="radio"/>
+                        <span>{{'¥0.00'}}</span>
+                    </div>
+                    <div class="modifyprice" @click="inputPriceModalShow()">修改运费</div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="submit">发货</div>
+    </div>
+
+    <!-- 输入运费模态框 -->
+    <div class="inputpricemodal" v-show="inputPriceModalBool">
+        <div class="inputbox">
+            <!-- 第一层 -->
+            <div class="n1">期望运费</div>
+            <!-- 第二层 -->
+            <div class="n2">
+                <div class="historyprice">
+                    <span class="name">历史成交:</span>
+                    <span class="priceinterval">{{historyPriceInterval}}</span>
+                </div>
+                <div class="inputarea">
+                    <input type="number" placeholder="请输入期望运费">
+                </div>
+                <div class="noticearea">最终运费以合同为准</div>
+
+            </div>
+            <!-- 第三层 -->
+            <div class="n3">
+                <div class="cancel">取消</div>
+                <div class="yes">确定</div>
+            </div>
+        </div>
+    </div>
+    
+        
 
   </div>
 </template>
@@ -190,6 +260,10 @@ export default {
             payWay:'',
             userSelectTime:'',
             userNote:[],
+            priceData:[1],
+            userInputPrice:2,
+            inputPriceModalBool:false,
+            historyPriceInterval:0,
 
             //   时间选择器相关
             birthday:"",  //出生日期
@@ -232,6 +306,9 @@ export default {
         this.userCarLength = [];
         this.userCarType = [];
         console.log(this.userCarLength);
+    },
+    inputPriceModalShow(){
+        this.inputPriceModalBool = true;
     },
     selectCarLength(item,index){
     item.bool = !item.bool;
@@ -348,366 +425,503 @@ export default {
         }
     }
 
-    // 第二层
-    .size{
-        width:r(690);
-        height:r(177);
-        margin:r(25) auto;
-        background:#fff;
-        border-radius:r(10);
-        padding:0 r(20);
-        .weight{
-            width:r(650);
-            height:r(88);
-            line-height:r(88);
-            border-bottom:1px solid rgba(198,198,198,0.3);
-            .name{
-                font-size:r(30);
-                color:#333;
-            }
-            input{
-                font-size:r(26);
-                width:r(150);
-                height:r(48);
-                border:none;
-                float:right;
-                margin:r(20) r(20) 0 0;
-                text-align:right;
-                overflow:hidden;
-            }
-            .unit{
-                font-size:r(30);
-                color:#333;
-            }
-        }
-        .volume{
-            width:r(650);
-            height:r(88);
-            line-height:r(88);
-            .name{
-                font-size:r(30);
-                color:#333;
-            }
-            input{
-                font-size:r(26);
-                width:r(150);
-                height:r(48);
-                border:none;
-                float:right;
-                margin:r(20) r(20);
-                text-align:right;
-                overflow:hidden;
-            }
-            .unit{
-                font-size:r(30);
-                color:#333;
-            }
-        }
-    }
-
-    // 第三层
-    .goodtype{
-        width:r(690);
-        height:r(397);
-        margin:0 auto;
-        padding:0 r(20);
-        background:#fff;
-        border-radius:r(10);
-        .name{
-            width:r(650);
-            height:r(88);
-            font-size:r(30);
-            color:#333;
-            line-height:r(88);
-            border-bottom:1px solid rgba(198,198,198,0.3);
-        }
-        .typeoptions{
-            height:r(155);
-            width:r(650);
-            ul{
+    .body{
+        width:100%;
+        height:r(910);
+        overflow:auto;
+        
+        // 第二层
+        .size{
+            width:r(690);
+            height:r(177);
+            margin:r(25) auto;
+            background:#fff;
+            border-radius:r(10);
+            padding:0 r(20);
+            .weight{
                 width:r(650);
-                height:r(155);
-                display:flex;
-                flex-direction:column;
-                flex-wrap: wrap;
-                li{
-                    width:r(148);
-                    height:r(50);
-                    background:#F7F7F7;
-                    border-radius:r(28);
-                    text-align:center;
-                    line-height:r(50);
-                    margin: r(16) r(6) 0 r(6);
+                height:r(88);
+                line-height:r(88);
+                border-bottom:1px solid rgba(198,198,198,0.3);
+                .name{
+                    font-size:r(30);
+                    color:#333;
+                }
+                input{
                     font-size:r(26);
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    box-sizing:border-box;
-                    
+                    width:r(150);
+                    height:r(48);
+                    border:none;
+                    float:right;
+                    margin:r(20) r(20) 0 0;
+                    text-align:right;
+                    overflow:hidden;
                 }
-                .selectedtype{
-                    width:r(148);
-                    height:r(50);
-                    background:#fff;
-                    color:#0350A0;
-                    border:1px solid #0350A0;
-                    line-height:r(46);
+                .unit{
+                    font-size:r(30);
+                    color:#333;
                 }
-                .othertype{
+            }
+            .volume{
+                width:r(650);
+                height:r(88);
+                line-height:r(88);
+                .name{
+                    font-size:r(30);
+                    color:#333;
+                }
+                input{
+                    font-size:r(26);
+                    width:r(150);
+                    height:r(48);
+                    border:none;
+                    float:right;
+                    margin:r(20) r(20);
+                    text-align:right;
+                    overflow:hidden;
+                }
+                .unit{
+                    font-size:r(30);
                     color:#333;
                 }
             }
         }
-        .inputtype{
-            width:r(650);
-            height:r(153);
-            .othergood{
-                width:r(650);
-                height:r(60);
-                font-size:r(22);
-                color:#666;
-                line-height:r(60);
-            }
-            input{
-                width:r(640);
-                height:r(68);
-                border:none;
-                background:#F2F6F9;
-                border-radius:r(10);
-                font-size:r(26);
-                padding-left:r(10);
-            }
-        }
-    }
 
-    // 时间和车型
-    .loadtimeandcartype{
-        width:r(690);
-        height:r(177);
-        margin:r(25) auto;
-        background:#fff;
-        border-radius:r(10);
-        padding:0 r(20);
-        .loadtime{
-            width:r(650);
-            height:r(88);
-            line-height:r(88);
-            border-bottom:1px solid rgba(198,198,198,0.3);
-            .name{
-                font-size:r(30);
-                color:#333;
-                display:inline-block;
-                width:r(130);
-            }
-            .notice{
-                display:inline-block;
-                font-size:r(26);
-                color:#999;
-                width:r(486);
-                // margin:r(20) r(20) 0 0;
-                text-align:right;
-            }
-            .more{
-                display:inline-block;
-                width:r(14);
-                height:r(23);
-                background:url(../../assets/right.png) no-repeat;
-                background-size: r(14) r(23);
-                vertical-align:middle;
-                margin-left:r(20);
-            }
-        }
-        // cartype
-        .cartype{
+        // 第三层
+        .goodtype{
             width:r(690);
-            height:r(88);
-            line-height:r(88);
+            height:r(397);
+            margin:0 auto;
+            padding:0 r(20);
+            background:#fff;
+            border-radius:r(10);
             .name{
+                width:r(650);
+                height:r(88);
                 font-size:r(30);
                 color:#333;
-                display:inline-block;
-                width:r(130);
+                line-height:r(88);
+                border-bottom:1px solid rgba(198,198,198,0.3);
             }
-            .notice{
-                display:inline-block;
-                font-size:r(26);
-                color:#999;
-                width:r(486);
-                // margin:r(20) r(20) 0 0;
-                text-align:right;
+            .typeoptions{
+                height:r(155);
+                width:r(650);
+                ul{
+                    width:r(650);
+                    height:r(155);
+                    display:flex;
+                    flex-direction:column;
+                    flex-wrap: wrap;
+                    li{
+                        width:r(148);
+                        height:r(50);
+                        background:#F7F7F7;
+                        border-radius:r(28);
+                        text-align:center;
+                        line-height:r(50);
+                        margin: r(16) r(6) 0 r(6);
+                        font-size:r(26);
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        box-sizing:border-box;
+                        
+                    }
+                    .selectedtype{
+                        width:r(148);
+                        height:r(50);
+                        background:#fff;
+                        color:#0350A0;
+                        border:1px solid #0350A0;
+                        line-height:r(46);
+                    }
+                    .othertype{
+                        color:#333;
+                    }
+                }
             }
-            .more{
-                display:inline-block;
-                width:r(14);
-                height:r(23);
-                background:url(../../assets/right.png) no-repeat;
-                background-size: r(14) r(23);
-                vertical-align:middle;
-                margin-left:r(20);
-            }
-        }
-    }
-
-    // 付款和备注
-    .paywayandnote{
-        width:r(690);
-        height:r(177);
-        margin:r(10) auto 0;
-        background:#fff;
-        border-radius:r(10);
-        padding:0 r(20);
-        .payway{
-            width:r(650);
-            height:r(88);
-            line-height:r(88);
-            border-bottom:1px solid rgba(198,198,198,0.3);
-            .name{
-                font-size:r(30);
-                color:#333;
-                display:inline-block;
-                width:r(130);
-            }
-            .notice{
-                display:inline-block;
-                font-size:r(26);
-                color:#999;
-                width:r(486);
-                // margin:r(20) r(20) 0 0;
-                text-align:right;
-            }
-            .more{
-                display:inline-block;
-                width:r(14);
-                height:r(23);
-                background:url(../../assets/right.png) no-repeat;
-                background-size: r(14) r(23);
-                vertical-align:middle;
-                margin-left:r(20);
-            }
-        }
-        // note
-        .note{
-            width:r(650);
-            height:r(88);
-            line-height:r(88);
-            .name{
-                font-size:r(30);
-                color:#333;
-                display:inline-block;
-                width:r(130);
-            }
-            .notice{
-                display:inline-block;
-                font-size:r(26);
-                color:#999;
-                width:r(486);
-                // margin:r(20) r(20) 0 0;
-                text-align:right;
-            }
-            .more{
-                display:inline-block;
-                width:r(14);
-                height:r(23);
-                background:url(../../assets/right.png) no-repeat;
-                background-size: r(14) r(23);
-                vertical-align:middle;
-                margin-left:r(20);
+            .inputtype{
+                width:r(650);
+                height:r(153);
+                .othergood{
+                    width:r(650);
+                    height:r(60);
+                    font-size:r(22);
+                    color:#666;
+                    line-height:r(60);
+                }
+                input{
+                    width:r(640);
+                    height:r(68);
+                    border:none;
+                    background:#F2F6F9;
+                    border-radius:r(10);
+                    font-size:r(26);
+                    padding-left:r(10);
+                }
             }
         }
-    }
 
-    // 存常发货源
-    .topermanent{
-        width:r(690);
-        height:r(82);
-        margin:0 auto;
-        line-height:r(82);
-        
-            input{
-                width:r(30);
-                height:r(30);
-                vertical-align:middle;
+        // 时间和车型
+        .loadtimeandcartype{
+            width:r(690);
+            height:r(177);
+            margin:r(25) auto;
+            background:#fff;
+            border-radius:r(10);
+            padding:0 r(20);
+            .loadtime{
+                width:r(650);
+                height:r(88);
+                line-height:r(88);
+                border-bottom:1px solid rgba(198,198,198,0.3);
+                .name{
+                    font-size:r(30);
+                    color:#333;
+                    display:inline-block;
+                    width:r(130);
+                }
+                .notice{
+                    display:inline-block;
+                    font-size:r(26);
+                    color:#999;
+                    width:r(486);
+                    // margin:r(20) r(20) 0 0;
+                    text-align:right;
+                }
+                .more{
+                    display:inline-block;
+                    width:r(14);
+                    height:r(23);
+                    background:url(../../assets/right.png) no-repeat;
+                    background-size: r(14) r(23);
+                    vertical-align:middle;
+                    margin-left:r(20);
+                }
             }
-            span{
-                display:inline-block;
-                vertical-align:middle;
-                font-size:r(26);
-                color:#333;
+            // cartype
+            .cartype{
+                width:r(690);
+                height:r(88);
+                line-height:r(88);
+                .name{
+                    font-size:r(30);
+                    color:#333;
+                    display:inline-block;
+                    width:r(130);
+                }
+                .notice{
+                    display:inline-block;
+                    font-size:r(26);
+                    color:#999;
+                    width:r(486);
+                    // margin:r(20) r(20) 0 0;
+                    text-align:right;
+                }
+                .more{
+                    display:inline-block;
+                    width:r(14);
+                    height:r(23);
+                    background:url(../../assets/right.png) no-repeat;
+                    background-size: r(14) r(23);
+                    vertical-align:middle;
+                    margin-left:r(20);
+                }
             }
+        }
+
+        // 付款和备注
+        .paywayandnote{
+            width:r(690);
+            height:r(177);
+            margin:r(10) auto 0;
+            background:#fff;
+            border-radius:r(10);
+            padding:0 r(20);
+            .payway{
+                width:r(650);
+                height:r(88);
+                line-height:r(88);
+                border-bottom:1px solid rgba(198,198,198,0.3);
+                .name{
+                    font-size:r(30);
+                    color:#333;
+                    display:inline-block;
+                    width:r(130);
+                }
+                .notice{
+                    display:inline-block;
+                    font-size:r(26);
+                    color:#999;
+                    width:r(486);
+                    // margin:r(20) r(20) 0 0;
+                    text-align:right;
+                }
+                .more{
+                    display:inline-block;
+                    width:r(14);
+                    height:r(23);
+                    background:url(../../assets/right.png) no-repeat;
+                    background-size: r(14) r(23);
+                    vertical-align:middle;
+                    margin-left:r(20);
+                }
+            }
+            // note
+            .note{
+                width:r(650);
+                height:r(88);
+                line-height:r(88);
+                .name{
+                    font-size:r(30);
+                    color:#333;
+                    display:inline-block;
+                    width:r(130);
+                }
+                .notice{
+                    display:inline-block;
+                    font-size:r(26);
+                    color:#999;
+                    width:r(486);
+                    // margin:r(20) r(20) 0 0;
+                    text-align:right;
+                }
+                .more{
+                    display:inline-block;
+                    width:r(14);
+                    height:r(23);
+                    background:url(../../assets/right.png) no-repeat;
+                    background-size: r(14) r(23);
+                    vertical-align:middle;
+                    margin-left:r(20);
+                }
+            }
+        }
+
+        // 存常发货源
+        .topermanent{
+            width:r(690);
+            height:r(82);
+            margin:0 auto;
+            line-height:r(82);
+            
+                input{
+                    width:r(30);
+                    height:r(30);
+                    vertical-align:middle;
+                }
+                span{
+                    display:inline-block;
+                    vertical-align:middle;
+                    font-size:r(26);
+                    color:#333;
+                }
 
 
-            // input[type=checkbox]{
-            // // width:r(30);
-            // // height:r(30);
-            // // vertical-align:middle;
-            // // border-radius:50%;
-            // visibility: hidden;
-            // }
-            // label{
-            //     cursor:point;
-            //     width:r(30);
-            //     height:r(30);
-            //     border:1px solid #274A7D;
-            //     border-radius:50%;
-            //     background:F2F6F7;
-            //     position:absolute;
-            //     left:0;
-            //     top:0;
-            // }
-            // label:after{
-            //     opacity:1;
-            //     content:'';
-            //     position:absolute;
-            //     width:9px;
-            //     height:5px;
-            //     background:transparent;
-            //     top:6px;
-            //     left:6px;
-            //     border:3px solid red;
-            //     border-top:none;
-            //     border-right:none;
-            //     transform:rotate(-45deg);
-            // }
-            // input[type=checkbox]:checked~label{
-            //     background:#f40;
-	        //     border:2px solid #f40;
-            // }
-            // input[type=checkbox]:checked~label:after{
-            //     opacity:1;
-	        //     background:#f40;
-            // }
+                // input[type=checkbox]{
+                // // width:r(30);
+                // // height:r(30);
+                // // vertical-align:middle;
+                // // border-radius:50%;
+                // visibility: hidden;
+                // }
+                // label{
+                //     cursor:point;
+                //     width:r(30);
+                //     height:r(30);
+                //     border:1px solid #274A7D;
+                //     border-radius:50%;
+                //     background:F2F6F7;
+                //     position:absolute;
+                //     left:0;
+                //     top:0;
+                // }
+                // label:after{
+                //     opacity:1;
+                //     content:'';
+                //     position:absolute;
+                //     width:9px;
+                //     height:5px;
+                //     background:transparent;
+                //     top:6px;
+                //     left:6px;
+                //     border:3px solid red;
+                //     border-top:none;
+                //     border-right:none;
+                //     transform:rotate(-45deg);
+                // }
+                // input[type=checkbox]:checked~label{
+                //     background:#f40;
+                //     border:2px solid #f40;
+                // }
+                // input[type=checkbox]:checked~label:after{
+                //     opacity:1;
+                //     background:#f40;
+                // }
 
+        }
     }
 
     // 底层
+    // 原来
+    // .bottom{
+    //     width:100%;
+    //     height:r(126);
+    //     background:#fff;
+    //     position:fixed;
+    //     left:0;
+    //     bottom:0;
+    //     .price{
+    //         display:inline-block;
+    //         width:r(375);
+    //         height:r(126);
+    //         line-height:r(126);
+    //         text-align:center;
+    //         font-size:r(26);
+    //         color:#999;
+    //     }
+    //     .publish{
+    //         display:inline-block;
+    //         width:r(300);
+    //         height:r(86);
+    //         background:#f28312;
+    //         vertical-align:middle;
+    //         border-radius:r(43);
+    //         text-align:center;
+    //         line-height:r(86);
+    //         font-size:r(32);
+    //         color:#fff;
+    //         margin-left:r(32);
+    //     }
+    // }
+
     .bottom{
-        width:100%;
-        height:r(126);
+        width:r(690);
+        height:r(316);
         background:#fff;
-        position:fixed;
-        left:0;
+        position:absolute;
+        left:r(30);
         bottom:0;
-        .price{
-            display:inline-block;
-            width:r(375);
-            height:r(126);
-            line-height:r(126);
-            text-align:center;
-            font-size:r(26);
-            color:#999;
+        z-index:10;
+        box-shadow:0px -1px 10px rgba(0,0,0,0.06);
+        overflow:hidden;
+        border-radius:r(10) r(10) 0 0;
+        .uparea{
+            width:100%;
+            height:r(150);
+            margin-top:r(30);
+            .noinput{
+                width:r(345);
+                height:r(150);
+                text-align:center;
+                font-size:r(26);
+                color:#999;
+                display:flex;
+                .noticearea{
+                    margin:auto;
+                }
+            }
+            .autoprice{
+                width:r(345);
+                height:r(150);
+                .totalprice{
+                    width:100%;
+                    height:r(60);
+                    line-height:r(60);
+                    input{
+                        vertical-align:middle;
+                        margin-left:r(40);
+                    }
+                    span{
+                        vertical-align:middle;
+                        margin-left:r(20);
+                        font-size:r(30);
+                        color:#F28312;
+                    }
+                }
+                .averageprice{
+                    width:r(260);
+                    height:r(45);
+                    margin-left:r(85);
+                    font-size:r(26);
+                    color:#999;
+                    line-height:r(45);
+                }
+                .length{
+                    width:r(260);
+                    height:r(45);
+                    margin-left:r(85);
+                    font-size:r(26);
+                    color:#999;
+                    line-height:r(45);
+                }
+            }
+            .userpricenotice{
+                width:r(344);
+                height:r(150);
+                border-left:1px solid rgba(198,198,198,0.3);
+                display:flex;
+                .selectarea{
+                    margin:auto;
+                    input{
+                        vertical-align:middle;
+                    }
+                    span{
+                        display:inline-block;
+                        vertical-align:middle;
+                        margin-left:r(100);
+                    }
+                }
+            }
+            .userpriceshow{
+                width:r(344);
+                height:r(150);
+                border-left:1px solid rgba(198,198,198,0.3);
+                display:flex;
+                .userprice{
+                    width:r(260);
+                    height:r(100);
+                    margin:auto;
+                    .pricearea{
+                        width:100%;
+                        height:r(50);
+                        input{
+                            margin-left:r(40);
+                            vertical-align:middle;
+                        }
+                        span{
+                            display:inline-block;
+                            text-align:center;
+                            vertical-align:middle;
+                            margin-left:r(20);
+                            font-size:r(30);
+                            color:#F28312;
+                            line-height:r(50);
+                        }
+                    }
+                    .modifyprice{
+                        width:100%;
+                        height:r(50);
+                        text-align:center;
+                        line-height:r(50);
+                        font-size:r(26);
+                        color:#0350A0;
+                    }
+                    
+                }
+            }
         }
-        .publish{
-            display:inline-block;
-            width:r(300);
+        .submit{
+            width:r(650);
             height:r(86);
-            background:#f28312;
-            vertical-align:middle;
-            border-radius:r(43);
+            margin:0 auto;
             text-align:center;
             line-height:r(86);
+            background:#F28312;
+            border-radius:r(43);
+            margin:r(30) auto;
             font-size:r(32);
             color:#fff;
-            margin-left:r(32);
         }
     }
 
@@ -718,6 +932,7 @@ export default {
         position:fixed;
         left:0;
         top:0;
+        z-index:10000000;
         background:rgba(0,0,0,0.3);
         .closearea{
             width:100%;
@@ -899,6 +1114,7 @@ export default {
         position:fixed;
         left:0;
         top:0;
+        z-index:10000;
         background:rgba(0,0,0,0.3);
         .closearea{
             width:100%;
@@ -933,6 +1149,42 @@ export default {
                 text-align:center;
                 font-size:r(36);
                 color:#333; 
+            }
+        }
+    }
+
+    .inputpricemodal{
+        width:100%;
+        height:r(1334);
+        position:fixed;
+        left:0;
+        top:0;
+        z-index:10000;
+        background:rgba(0,0,0,0.3);
+        display:flex;
+        .inputbox{
+            width:r(562);
+            height:r(446);
+            background:#fff;
+            border-radius:r(14);
+            margin:auto;
+            .n1{
+                width:100%;
+                height:r(110);
+                border-bottom:1px solid rgba(198,198,198,0.3);
+                text-align:center;
+                line-height:r(110);
+                font-size:r(36);
+                color:#333;
+            }
+            .n2{
+                width:100%;
+                height:r(233);
+                background:pink;
+                .historyprice{
+                    width:100%;
+                    height:r(100);
+                }
             }
         }
     }

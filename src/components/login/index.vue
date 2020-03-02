@@ -10,13 +10,13 @@
     <div class="body">
       <h1>登录</h1>
       <div class="inputArea">
-        <div class="phone">
-          <input type=text placeholder="请输入手机号"/>
+        <div class="phone" ref="inputPhone">
+          <input type=text placeholder="请输入手机号" @blur="validatePhone()"/>
         </div>
         <div class="code">
           <input type=number placeholder="请输入验证码"/>
           <!--  @click="sendcodes()" -->
-          <Timer slot="icon"></Timer>
+          <Timer slot="icon" @click="sendCode()"></Timer>
         </div>
       </div>
       <div class="loginbtn">
@@ -56,6 +56,10 @@
       <div class="cancelcall" @click="cancelCall()">取消</div>
     </div>
 
+    <!-- 手机号填错提示模态 -->
+    <div class="errPhoneModal" v-show="errPhoneModalBool" @click="closeErrPhoneModal()">
+      <div class="notice">请输入正确的手机号码！</div> 
+    </div>
 
   </div>
 </template>
@@ -69,18 +73,16 @@ export default {
   data(){
     return {
       callBool:false,
+      errPhoneModalBool:false,
       offGray: true,
       tabItem: 1,
       checked: true,
       form1: {
-          username: '',
-          password: '',
-          openid:""
+          phone: '',
       },
       form2: {
-          username: '',
-          password: '',
-          openid:""
+          phone: '',
+          code: '',
       },
       fullPath:"", //获取整个路由 已经后面的参数
       openidLogin:'',
@@ -136,6 +138,19 @@ export default {
     },
     back(){
       this.$router.go(0);
+    },
+    validatePhone(){
+      let reg = /^1[3456789]\d{9}$/;
+      let phoneNum = this.$refs.inputPhone.children[0].value;
+      if(!reg.test(phoneNum)){
+        this.errPhoneModalBool = true;
+      }
+    },
+    closeErrPhoneModal(){
+      this.errPhoneModalBool = false;
+    },
+    sendCode(){
+      console.log(this);
     },
     showCall(){
       this.callBool = true;
@@ -622,6 +637,23 @@ export default {
       font-size:r(40);
       color:#108EE9;
       font-weight:500;
+    }
+  }
+
+  // 模态框
+  .errPhoneModal{
+    width:100%;
+    height:r(1334);
+    position:fixed;
+    left:0;
+    top:0;
+    background:rgba(0,0,0,0.3);
+    display:flex;
+    .notice{
+      background:#fff;
+      font-size:r(32);
+      color:red;
+      margin:auto;
     }
   }
 }
