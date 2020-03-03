@@ -1,4 +1,3 @@
-
 import qs from "qs";
 var query=qs.parse(location.search.slice(1));
 

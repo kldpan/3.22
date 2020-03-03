@@ -8,6 +8,8 @@ import router from './router'
 
 import store from '@/core/store'
 
+import http from '@/core/api/http.js'
+
 import 'lib-flexible/flexible.js'
 import 'font-awesome/css/font-awesome.css'
 import "mint-ui/lib/style.css"
@@ -36,6 +38,10 @@ VueTouch.config.swipe = {
 //   // console.log("run11111")
 //   console.dir(Vue);
 // })
+
+// 将http(axios写入Vue原型中,全局组件即可调用)
+Vue.prototype.$http = http;
+
 Vue.config.productionTip = false;
 
 new Vue({

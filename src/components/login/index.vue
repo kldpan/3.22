@@ -65,6 +65,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import Vue from "vue";
 import Timer from "./timer.vue";
 import {Toast} from "mint-ui";
@@ -88,6 +89,12 @@ export default {
       openidLogin:'',
       codeul: null
     }
+  },
+  mounted(){
+    let data = {test:{a:1,b:2,c:3}}
+    this.$http.get('192.168.0.116:8080/login/sendCode/18435103582',"data").then(res=>{
+      console.log(res);
+    })
   },
   components: {
       Timer
@@ -144,6 +151,9 @@ export default {
       let phoneNum = this.$refs.inputPhone.children[0].value;
       if(!reg.test(phoneNum)){
         this.errPhoneModalBool = true;
+        setTimeout(() => {
+          this.closeErrPhoneModal();
+        },800)
       }
     },
     closeErrPhoneModal(){

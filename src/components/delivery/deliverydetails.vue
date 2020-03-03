@@ -68,7 +68,7 @@
         <!-- 第六层 -->
         <div class="topermanent">
             <div class="mycheck">
-                <input type="checkbox"/>
+                <input type="checkbox" :checked="saveChecked"/>
                 <span>是否存为常发货源</span>
             </div>
         </div>
@@ -156,14 +156,14 @@
             <!-- 无价格时左 -->
             <div class="noinput fl" v-if="priceData.length === 0">
                 <div class="noticearea">
-                    <div>填写重量/体积</div>
+                    <div>填写重量和车长</div>
                     <div>显示运费</div>
                 </div>
             </div>
             <!-- 有价格时左 -->
             <div class="autoprice fl" v-else="priceData.length !== 0">
                 <div class="totalprice">
-                    <input type="radio"/>
+                    <input type="radio" :checked="selectWhichPriceChecked" @click="selectWhichPrice()"/>
                     <span>{{'¥0.00'}}</span>
                 </div>
                 <div class="averageprice">每吨约{{0}}元</div>
@@ -172,7 +172,7 @@
             <!-- 用户未输入时右 -->
             <div class="userpricenotice fr" v-if="!userInputPrice">
                 <div class="selectarea">
-                    <input type="radio"/>
+                    <input type="radio" :checked="inputChecked" @click="userInputPriceShow()"/>
                     <span>自己报价</span>
                 </div>
             </div>
@@ -180,16 +180,15 @@
             <div class="userpriceshow fr" v-else="userInputPrice">
                 <div class="userprice">
                     <div class="pricearea">
-                        <input type="radio"/>
-                        <span>{{'¥0.00'}}</span>
+                        <input type="radio" :checked="!selectWhichPriceChecked" @click="selectWhichPrice()"/>
+                        <span>￥{{userInputPrice}}</span>
                     </div>
-                    <div class="modifyprice" @click="inputPriceModalShow()">修改运费</div>
+                    <div class="modifyprice" @click="modifyInputPrice()">修改运费</div>
                 </div>
-                
             </div>
         </div>
         
-        <div class="submit">发货</div>
+        <div class="submit" @click="sendToOrder()">发货</div>
     </div>
 
     <!-- 输入运费模态框 -->
@@ -201,18 +200,18 @@
             <div class="n2">
                 <div class="historyprice">
                     <span class="name">历史成交:</span>
-                    <span class="priceinterval">{{historyPriceInterval}}</span>
+                    <span class="priceinterval">{{'￥' + historyPriceInterval.minprice + ' ~ ' + '￥' + historyPriceInterval.maxprice}}</span>
                 </div>
-                <div class="inputarea">
-                    <input type="number" placeholder="请输入期望运费">
+                <div class="inputarea" ref="inputPrice">
+                    <input type="number" placeholder="￥  请输入期望运费">
                 </div>
                 <div class="noticearea">最终运费以合同为准</div>
 
             </div>
             <!-- 第三层 -->
-            <div class="n3">
-                <div class="cancel">取消</div>
-                <div class="yes">确定</div>
+            <div class="n3 clearfix">
+                <div class="cancel fl" @click="closeInputPriceModal()">取消</div>
+                <div class="yes fr" @click="submitInputPrice()">确定</div>
             </div>
         </div>
     </div>
@@ -260,15 +259,18 @@ export default {
             payWay:'',
             userSelectTime:'',
             userNote:[],
-            priceData:[1],
-            userInputPrice:2,
+            priceData:[],
+            userInputPrice:0,
             inputPriceModalBool:false,
-            historyPriceInterval:0,
+            historyPriceInterval:{minprice:5555,maxprice:8888},
+            saveChecked:true,
+            inputChecked:false,
+            selectWhichPriceChecked:true,
 
             //   时间选择器相关
             birthday:"",  //出生日期
             startDate: new Date('1968-01-01'),
-            pickerValue:''
+            pickerValue:'',
       }
   },
   mounted(){
@@ -371,6 +373,56 @@ export default {
         }
         console.log(this.$route);
         
+    },
+    sendToOrder(){
+        // 1.携参跳转
+
+        // 2.本地保存数据
+
+        // 3.发后端
+    },
+    closeInputPriceModal(){
+        this.inputPriceModalBool = false;
+        this.inputChecked = false;
+    },
+    submitInputPrice(){
+        let inputVal = this.$refs.inputPrice.children[0].value;
+        // if(inputVal){
+        //     this.userInputPrice = inputVal;
+        //     this.inputPriceModalBool = false;
+        // }else{
+        //     this.closeInputPriceModal();
+        // }
+        if(this.priceData.length === 0 && !inputVal){
+            this.closeInputPriceModal();
+        }else if(this.priceData.length === 0 && inputVal){
+            this.inputPriceModalBool = false;
+            this.userInputPrice = inputVal;
+            this.selectWhichPriceChecked = false;
+        }else if(this.priceData.length !== 0){
+            this.closeInputPriceModal();
+            this.userInputPrice = inputVal;
+            this.selectWhichPriceChecked = true;
+        }
+    },
+    modifyInputPrice(){
+        this.inputPriceModalBool = true;
+        let inputVal = this.$refs.inputPrice.children[0].value;
+        if(this.selectWhichPriceChecked){
+            this.selectWhichPriceChecked = true;
+        }
+    },
+    selectWhichPrice(){
+        this.selectWhichPriceChecked = !this.selectWhichPriceChecked;
+    },
+    userInputPriceShow(){
+        this.inputChecked = !this.inputChecked;
+        if(this.inputChecked){
+            this.inputPriceModalBool = true;
+        }
+    },
+    autoPrice(){
+
     },
 
 
@@ -869,7 +921,7 @@ export default {
                     span{
                         display:inline-block;
                         vertical-align:middle;
-                        margin-left:r(100);
+                        margin-left:r(10);
                     }
                 }
             }
@@ -1180,10 +1232,78 @@ export default {
             .n2{
                 width:100%;
                 height:r(233);
-                background:pink;
                 .historyprice{
+                    width:r(330);
+                    height:r(77);
+                    margin:0 auto;
+                    line-height:r(77);
+                    .name{
+                        display:inline-block;
+                        margin:auto;
+                        width:r(120);
+                        height:r(77);
+                        font-size:r(26);
+                        color:#999;
+                        text-align:center;
+                    }
+                    .priceinterval{
+                        display:inline-block;
+                        width:r(210);
+                        height:r(77);
+                        text-align:center;
+                        font-size:r(26);
+                        color:#FF4343;
+                    }
+                }
+                .inputarea{
+                    width:r(285);
+                    height:r(80);
+                    border:1px solid rgba(198,198,198,0.3);
+                    border-radius:r(40);
+                    margin:0 auto;
+                    overflow:hidden;
+                    input{
+                        width:r(280);
+                        height:r(76);
+                        line-height:r(80);
+                        border:none;
+                        padding:0 r(30);
+                        font-size:r(26);
+                        color:#0350A0;
+                        font-size:r(26);
+                        // text-align:center;
+                    }
+                }
+                .noticearea{
                     width:100%;
-                    height:r(100);
+                    height:r(76);
+                    border-bottom:1px solid rgba(198,198,198,0.3);
+                    text-align:center;
+                    line-height:r(76);
+                    font-size:r(26);
+                    color:#999;
+                }
+            }
+            .n3{
+                width:100%;
+                height:r(103);
+                .cancel{
+                    width:r(280);
+                    height:r(103);
+                    font-size:r(36);
+                    text-align:center;
+                    line-height:r(103);
+                    border-right:1px solid rgba(198,198,198,0.3);
+                    color:#000;
+                }
+                .yes{
+                    width:r(281);
+                    height:r(103);
+                    font-size:r(36);
+                    text-align:center;
+                    line-height:r(103);
+                    border-right:1px solid rgba(198,198,198,0.3);
+                    color:#108EE9;
                 }
             }
         }

@@ -35,7 +35,7 @@ class Apis {
      }
 
 
-    //  后端接口测试
+    //  后端首页接口测试
     getTest03(){
         return request({
              method:"GET",
@@ -44,7 +44,18 @@ class Apis {
                  
              }
          })
-     }
+    }
+
+    // 后端数据传送测试
+    sendTest01(){
+        return request({
+            method:"GET",
+            url:"http://192.168.0.116:8080/login/sendCode/18435103582",
+            params:{
+                
+            }
+        })
+    }
 
 
     // getTopic(){
