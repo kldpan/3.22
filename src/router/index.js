@@ -207,41 +207,41 @@ const routes = [
     redirect: "/index"
   }
 ];
+
+
+
 const router = new VueRouter({
   // mode:"history",
   routes
 });
 //全局的路由钩子函数
 router.beforeEach((to, from, next) => {
-  // console.log(params.userType)
-  //from  从哪来
-  //to    到哪去
-  //next(); 是否到下一个路由
-  // console.log(to.path);
-  // if(to.path=="/"){
-  //   next({path:"/index"})
+  const isLogin = localStorage.ele_login ? true : false;
+  if(to.path === '/login'){
+    next();  
+  }else{
+    // 判断是否在登录状态下
+    isLogin ? next() : next('/login');
+  }
+  // if (to.path == "/") {
+  //   if (params.userType === "index") {
+  //     next({
+  //       path: "/index"
+  //     });
+  //   } else if (params.userType === "order") {
+  //     next({
+  //       path: "/order"
+  //     });
+  //   } else if (params.userType === "login") {
+  //     next({
+  //       path: "/login"
+  //     });
+  //   }else{
+  //     next();
+  //   }
   // }else{
   //   next();
-  // }
-  if (to.path == "/") {
-    if (params.userType === "index") {
-      next({
-        path: "/index"
-      });
-    } else if (params.userType === "order") {
-      next({
-        path: "/order"
-      });
-    } else if (params.userType === "login") {
-      next({
-        path: "/login"
-      });
-    }else{
-      next();
-    }
-  }else{
-    next();
-  } 
+  // } 
 });
 
 router.afterEach((to, from) => {

@@ -5,8 +5,9 @@ import  apis from "@/core/api/apis"
 Vue.use(Vuex);       //this.$store.state
 
 export default new Vuex.Store({
-  state: {     //全局属性变量  data
+  state: {
     currentCity:{},
+    loginData:{},
   },
   mutations:{
     // getCurrentCity(state,data){
@@ -18,6 +19,9 @@ export default new Vuex.Store({
       state.currentInfo = JSON.parse(JSON.stringify(data));
       // console.log(state.currentInfo);
     },
+    getLoginData(state,data){
+      state.loginData = JSON.parse(JSON.stringify(data));
+    }
   },
   getters:{
             //类似 组件内的 computed,函数名字 直接当变量去用

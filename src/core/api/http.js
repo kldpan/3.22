@@ -1,9 +1,8 @@
 import axios from "axios";
 
-
-
+// instance即封装好的axios,全局注册后直接调用即可
 var instance = axios.create({
-  baseURL: "",
+  baseURL: "192.168.0.116:8080",
   timeout: 10000,
   transformRequest: [
     function(data) {
@@ -30,7 +29,7 @@ var instance = axios.create({
 });
 
 // 什么是拦截器  项目里面所有的请求发送前
-instance.interceptors.request.use(function (config) {
+instance.interceptors.request.use(config => {
     // 在发送请求之前做些什么
     //打开loading
 
@@ -46,7 +45,7 @@ instance.interceptors.request.use(function (config) {
   });
 
 // 添加响应拦截器
-instance.interceptors.response.use(function (response) {
+instance.interceptors.response.use(response => {
     // 对响应数据做点什么
     // console.log(response)
     //关闭loading
@@ -56,27 +55,10 @@ instance.interceptors.response.use(function (response) {
     return Promise.reject(error);
   });
 
-export default instance;   //类似  $.ajax
+export default instance;
 
 
-
-
-/*
-instance({
-    method:"get",
-    url:"/1.jpg",
-    设置返回数据类型
-    headers:{
-        content-type:json
-    }
-    responseType: 'blob'
-    data:{
-
-    }
-})
-
-instance.all([getUserAccount(), getUserPermissions()])
-  .then(axios.spread(function (acct, perms) {
-    // 两个请求现在都执行完成
-  }));
-*/ 
+// instance.all([getUserAccount(), getUserPermissions()])
+//   .then(axios.spread(function (acct, perms) {
+//     // 两个请求现在都执行完成
+//   }));

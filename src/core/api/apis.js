@@ -50,12 +50,11 @@ class Apis {
     sendTest01(){
         return request({
             method:"GET",
-            url:"http://192.168.0.116:8080/login/sendCode/18435103582",
-            params:{
-                
-            }
+            url:"http://192.168.0.116:8080/" + 'login/sendCode',
+            params:{test:{a:1,b:2,c:3}},
         })
     }
+
 
 
     // getTopic(){

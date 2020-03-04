@@ -338,7 +338,6 @@ export default {
       }
     })
 
-
     // this.currentLocation = JSON.parse(JSON.stringify(this.$store.state.currentCity));
     // console.log(this.$store.state.currentCity);
     // console.log(this.currentLocation);

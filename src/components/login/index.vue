@@ -3,7 +3,7 @@
     <!-- 第一层 -->
     <div class="top clearfix">
       <div class="back fl" @click="back()"></div>
-      <div class="register fr" @click="toPath('/register')">注册</div>
+      <!-- <div class="register fr" @click="toPath('/register')">注册</div> -->
     </div>
 
     <!-- 第二层 -->
@@ -11,16 +11,15 @@
       <h1>登录</h1>
       <div class="inputArea">
         <div class="phone" ref="inputPhone">
-          <input type=text placeholder="请输入手机号" @blur="validatePhone()"/>
+          <input type="number" placeholder="请输入手机号" v-model="form01.phone"/>
         </div>
         <div class="code">
-          <input type=number placeholder="请输入验证码"/>
-          <!--  @click="sendcodes()" -->
-          <Timer slot="icon" @click="sendCode()"></Timer>
+          <input type=number placeholder="请输入验证码" v-model="form01.code"/>
+          <button v-if="btnTitle" :disabled="timeDisabledBool" @click="sendCode()">{{btnTitle}}</button>
         </div>
       </div>
       <div class="loginbtn">
-        <div class="submit" @click="toPath('/mine')">登录</div>
+        <button class="submit" @click="toLogin()" :disabled="isLogin">登录</button>
       </div>
     </div>
 
@@ -65,91 +64,75 @@
 </template>
 
 <script>
-import axios from 'axios';
+// import instance from '@/core/api/http.js';
 import Vue from "vue";
-import Timer from "./timer.vue";
-import {Toast} from "mint-ui";
-Vue.use(Toast);
 export default {
   data(){
     return {
+      // mine
+      btnTitle:'获取验证码',
+      timeDisabledBool:false,
+      errors:{},
+      form01:{
+        phone:'',
+        code:'',
+      },
       callBool:false,
       errPhoneModalBool:false,
-      offGray: true,
-      tabItem: 1,
-      checked: true,
-      form1: {
-          phone: '',
-      },
-      form2: {
-          phone: '',
-          code: '',
-      },
-      fullPath:"", //获取整个路由 已经后面的参数
-      openidLogin:'',
-      codeul: null
+    }
+  },
+  computed:{
+    isLogin(){
+      if(this.form01.phone && this.form01.code) return false;
+      else return true;
     }
   },
   mounted(){
-    let data = {test:{a:1,b:2,c:3}}
-    this.$http.get('192.168.0.116:8080/login/sendCode/18435103582',"data").then(res=>{
-      console.log(res);
-    })
-  },
-  components: {
-      Timer
-  },
-  beforeRouteEnter(to, from, next) { //获取上个页面路由
-      next(vm=>{
-          vm.fullPath = from.fullPath
-      })
-  },
-  // created(){
-  //     // setTimeout(() => {
-  //     //     this.offGray =  false
-  //     // }, 500);
-  //     let dataLogin = null
-  //     if(this.$store.state.data.token || this.$store.state.data.wxOpenId == '' ){ //
-  //         this.offGray =  false
-  //         this.getInfo2() //重新触发微信绑定
-  //     }else{
-  //         this.getInfo() //第一次 触发 微信 登录 进行微信绑定
-  //     }
-  //       /**
-  //        if (localStorage.getItem('loginInfo')) { //localStorage 是否过期
-  //             let b = JSON.parse(localStorage.getItem('loginInfo'));
-  //             let time = b.time;
-  //             let data = b.date;
-  //             if ((parseInt(time) + parseInt(data)) < new Date().getTime()) {
-  //                 window.localStorage.removeItem('loginInfo');
-  //             } else {
-  //                 this.form1.username = b.username;
-  //                 this.form1.password = b.password;
-  //                 this.form1.openid = b.openid;
 
-  //                 this.form2.username = b.username;
-  //                 this.form2.password = b.password;
-  //                 this.form2.openid = b.openid;
-  //             }
-  //         }
-  //       */
-  //   document.title = '用户登录'
-  // },
-  // beforeRouteLeave(to, from, next){
-  //     document.title = '易棉购'
-  //     next()
-  // },
+  },
   methods: {
     toPath(url){
       this.$router.push(url);
     },
+    toLogin(){
+      // 如果有错误提醒，先取消错误提醒
+
+      // 发请求
+      instance({
+        method:"get",
+        url:"http://192.168.0.116:8080/login/verify/" + this.form01.phone + "/" + this.form01.code,
+        data:this.form01
+      })
+      .then(res=>{
+        console.log(res);
+        // 请求成功后，保存登录状态并跳转页面
+        // 将接口中返回的data数据统一放入localStorage和vuex中(localStorage中只存串，存对象时先转串再存，取出时解串，存一个数据时不用转)
+        let loginData = {
+          login:true,
+          accessToken:res.data.accessToken,
+          refreshToken:res.data.refreshToken,
+          accessExpireTime:res.data.accessExpireTime,
+          refreshExpireTime:res.data.refreshExpireTime,
+        }
+        localStorage.setItem('loginData',JSON.stringify(loginData));
+        this.$store.commit('getLoginData',loginData);
+        this.toPath('/');
+      })
+      .catch(err => {
+        // 返回失败信息
+        // this.errors = {
+        //   code: err.response.data.msg
+        // }
+        this.toPath('/login');
+        console.log(1111);
+      })
+    },
     back(){
       this.$router.go(0);
     },
-    validatePhone(){
+    validatePhone(phone){
       let reg = /^1[3456789]\d{9}$/;
-      let phoneNum = this.$refs.inputPhone.children[0].value;
-      if(!reg.test(phoneNum)){
+      if(!reg.test(phone)){
         this.errPhoneModalBool = true;
         setTimeout(() => {
           this.closeErrPhoneModal();
@@ -159,8 +142,47 @@ export default {
     closeErrPhoneModal(){
       this.errPhoneModalBool = false;
     },
+    timerBtn(){
+      let time = 5;
+      let timer = setInterval(() => {
+        if(time === 0){
+          clearInterval(timer);
+          this.btnTitle = "获取验证码";
+          this.timeDisabledBool = false;
+        }else {
+          // 倒计时
+          this.btnTitle = time + '秒后重试';
+          this.timeDisabledBool = true;
+          time--;
+        }
+      },1000);
+    },
     sendCode(){
-      console.log(this);
+      // 验证手机号格式
+      let reg = /^1[3456789]\d{9}$/;
+      if(reg.test(this.form01.phone)){
+        // 如果格式正确发送网络请求
+        // console.log(111);
+        this.timerBtn();
+        instance({
+          method:"get",
+          url:"http://192.168.0.116:8080/login/sendCode/" + this.form01.phone,
+          data:{phone:this.form01.phone}
+        }).then(res=>{
+          console.log(res);
+        });
+
+      }else {
+        this.errPhoneModalBool = true;
+        console.log('0000');
+        setTimeout(() => {
+          this.closeErrPhoneModal();
+          this.form01.phone = '';
+        },800)
+      }
+      // this.validatePhone(this.form01.phone);
+      // console.log(this.form01.phone);
+      // 发送请求
     },
     showCall(){
       this.callBool = true;
@@ -172,244 +194,6 @@ export default {
     cancelCall(){
       this.callBool = false;
     },
-    tabTitle(val) {
-        this.tabItem = val;
-    },
-    sendcodes(cd) {
-        if (this.form2.username == '') {
-            // this.common.msg('fail','请输入手机号');
-            Toast('请输入手机号')
-            return;
-        }
-        let data = {
-            params: {
-                urlAuth: this.config.urlArray.phoneLogin.auth
-            }
-        }
-        this.axios.get(this.config.urlArray.phoneLogin.url + '/' + this.form2.username, data).then((result) => {
-            if (result.data.status == 'OK') {
-                this.common.msg('success','获取成功');
-                cd();
-            } else {
-                // this.common.msg('fail', result.data.message);
-            }
-        }).catch((err) => {
-            // this.common.msg('fail','获取失败')
-        });
-    },
-    wxLogin() { //微信登录
-        let data = {
-            code:this.$route.query.code,
-        }
-        this.axios.post(this.config.urlArray.loginWx.url,data).then((result) => {
-              if (result.data.status == 'OK') {
-
-                this.form1.openid = result.data.data.wxOpenId
-                let storageInfo = new Object();
-                storageInfo.wxOpenId = this.form1.openid;
-                storageInfo.time = 604800000;
-                storageInfo.date = new Date().getTime();
-                Cookies.set('loginInfo', JSON.stringify(storageInfo),{ expires: 365, path: '' });
-                // this.common.msg('fail', result.data.message)
-
-                this.openidLogin = result.data.data.wxOpenId
-                // this.wxlogins(result.data.data.wxOpenId) //调用 openid  进行登录
-              }
-              else{
-                  this.form1.openid = result.data.data.openid
-
-              }
-        }).catch((err) => {
-            if(this.$store.state.data.token){
-                // this.common.msg('fail','登录失败')
-            }
-
-        });
-    },
-    wxLogin2() { //微信登录   (第一次登陆情况)
-        let data = {
-            code:this.$route.query.code,
-        }
-        this.axios.post(this.config.urlArray.loginWx.url, data).then((result) => {
-              if (result.data.status == 'OK') {
-                // 登录成功后用户信息存vuex
-                let userinfodata = result.data.data
-                this.form1.openid = userinfodata.wxOpenId
-                this.$store.commit('set_userinfo', userinfodata);
-                localStorage.setItem('data', JSON.stringify(userinfodata));
-                let storageInfo = new Object();
-                storageInfo.username = this.form1.username;
-                storageInfo.password = this.form1.password
-                storageInfo.openid = this.form1.openid;
-                storageInfo.time = 604800000;
-                storageInfo.date = new Date().getTime();
-                Cookies.set('loginInfo', JSON.stringify(storageInfo),{ expires: 365, path: '' });
-                // this.LoginBindwechatM() // 让后台 直接进行登录
-                // this.$router.push({ path: `${this.fullPath}`})
-            } else {
-                this.form1.openid = result.data.data.openid
-                // this.$store.commit('set_userinfo', userinfodata);
-                let storageInfo = new Object();
-                storageInfo.wxOpenId = this.form1.openid;
-                storageInfo.time = 604800000;
-                storageInfo.date = new Date().getTime();
-                Cookies.set('loginInfo', JSON.stringify(storageInfo),{ expires: 365, path: '' });
-                this.openidLogin = result.data.data.openid
-                // this.wxlogins(result.data.data.openid) //调用 openid  进行登录
-            }
-        }).catch((err) => {
-            if(this.$store.state.data.token){
-                // this.common.msg('fail','登录失败')
-            }
-
-        });
-    },
-    LoginBindwechatM(){
-        let datasw = this.form1.openid
-        let data = {
-            openid: datasw,
-            token: this.$store.state.data.token
-            // urlAuth: this.config.urlArray.LoginBindwechat.auth
-        }
-        this.axios.post(this.config.urlArray.LoginBindwechat.url, data).then((result) => {
-              if (result.data.status == 'OK') {
-                // 登录成功后用户信息存vuex
-                let userinfodata = result.data.data
-                this.$store.commit('set_userinfo', userinfodata);
-                localStorage.setItem('data', JSON.stringify(userinfodata));
-                if (this.checked) { //选中记住密码，存localStorage
-                    let storageInfo = new Object();
-                    storageInfo.username = this.form1.username;
-                    storageInfo.password = this.form1.password
-                    storageInfo.openid = this.form1.openid
-                    storageInfo.time = 604800000;
-                    storageInfo.date = new Date().getTime();
-                  Cookies.set('loginInfo', JSON.stringify(storageInfo),{ expires: 365, path: '' });
-
-                } else {
-                    Cookies.remove('loginInfo', { path: '' });
-                }
-                this.offGray =  false
-                this.$router.push({ path: `/home}`})
-                // this.$router.push({ path: `${this.fullPath}`})
-            } else {
-                this.common.msg('fail', result.data.message)
-            }
-        }).catch((err) => {
-            if(this.$store.state.data.token){
-                // this.common.msg('fail','登录失败')
-            }
-        });
-    },
-
-    wxlogins(openidLogin) { //通过微信  直接登录
-        let localData = Cookies.get('loginInfo') ? JSON.parse(Cookies.get('loginInfo')) : '';
-        if(localData &&　localData.username ){
-            this.form1.username = localData.username
-        }
-        if(localData &&　localData.password){
-            this.form1.password = localData.password
-        }
-        if (this.form1.username == '' || this.form1.password == '') { //验证表单的输入
-            Toast('请输入用户名和密码')
-            this.offGray = false
-            return;
-        }
-        let data = {
-            username: this.form1.username,
-            password: this.form1.password,
-            openid: this.openidLogin,
-            urlAuth: this.config.urlArray.login.auth
-        }
-        this.axios.post(this.config.urlArray.login.url, data).then((result) => {
-            if (result.data.status == 'OK') {
-                // 登录成功后用户信息存vuex
-                let userinfodata = result.data.data
-                this.$store.commit('set_userinfo', userinfodata);
-              localStorage.setItem('data', JSON.stringify(userinfodata));
-                  if (this.checked) { //选中记住密码，存localStorage
-                    let storageInfo = new Object();
-                    storageInfo.username = this.form1.username;
-                    storageInfo.password = this.form1.password
-                    storageInfo.openid = this.openidLogin
-                    storageInfo.time = 604800000;
-                    storageInfo.date = new Date().getTime();
-                    Cookies.set('loginInfo', JSON.stringify(storageInfo),{ expires: 365, path: '' });
-                } else {
-                    Cookies.remove('loginInfo', { path: '' });
-                }
-                this.offGray =  false
-
-                this.$router.push({ path: `${this.fullPath}`})
-            } else {
-                // this.common.msg('fail', result.data.message)
-            }
-        }).catch((err) => {
-            if(this.$store.state.data.token){
-                // this.common.msg('fail','登录失败')
-            }
-        });
-    },
-    fromcodelogin() { //短信验证码登录
-      let localData = JSON.parse(Cookies.get('loginInfo')) ? JSON.parse(Cookies.get('loginInfo')) : '';
-      if (this.form2.username == '' || this.form2.password == '') { //验证表单的输入
-            this.common.msg('fail','请输入手机号和验证码');
-            return;
-        }
-        let data = {
-            urlAuth: this.config.urlArray.phoneLogin.auth,
-            mobile: this.form2.username,
-            openid: this.form1.openid,
-            vcode: this.form2.password,
-        }
-        this.axios.post(this.config.urlArray.phoneLogin.url, data).then((result) => {
-            if (result.data.status == 'OK') {
-              if(result.data.data.userOrgState == '1'){
-                // 登录成功后用户信息存vuex
-                let userinfodata = result.data.data;
-                this.offGray =  false
-                this.$store.commit('set_userinfo', userinfodata);
-                localStorage.setItem('data', JSON.stringify(userinfodata));
-                this.$router.push({ path: `${this.fullPath}`})
-              }else{
-                this.common.msg('fail', '该企业未通过审核，请联系平台客服');
-              }
-
-            } else {
-                this.common.msg('fail', result.data.message)
-            }
-        }).catch((err) => {
-            if(this.$store.state.data.token){
-                // this.common.msg('fail','登录失败')
-              this.common.msg('fail', '服务器异常')
-            }
-        });
-      },
-      tocreateCards() { //创建名片
-          this.$router.push({
-              path: '/enterAuth'
-          })
-      },
-      toforgetPwd() { //忘记密码
-          this.$router.push({
-              path: '/forgetPw'
-          })
-      },
-    goBackHome(){
-      this.$router.push({
-        path: '/home'
-      })
-    },
-    goBackSupermaket(){
-      this.$router.push({
-        path: '/supermarket'
-      })
-    },
-    goFriend(){
-      this.$router.push({
-        path: '/friend'
-      })
-    }
   },
   // mounted() {
   //   let dataw = Cookies.get("loginInfo") ? JSON.parse(Cookies.get("loginInfo")): {};
