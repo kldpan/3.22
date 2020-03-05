@@ -1,134 +1,86 @@
 <template>
-  <div>
-    <div class="m-map" @drag="dragMap()">
-      <div class="search" v-if="placeSearch">
-        <input type="text" placeholder="请输入关键字" v-model="searchKey">
-        <button type="button" @click="handleSearch">搜索</button>
-        <div id="js-result" v-show="searchKey" class="result"></div>
-      </div>
-      <div id="js-container" class="map">正在加载数据 ...</div>
+<div class="mapbox">
+  <input type="text" v-model="search_key">
+  <div class="amap-page-container">
+    <div :style="{width:'100%',height:'300px'}">
+      <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center">
+      </el-amap>
+    </div>
+
+
+    <div class="toolbar">
+        <span v-if="loaded">
+          location: lng = {{ lng }} lat = {{ lat }}
+        </span>
+      <span v-else>正在定位</span>
+    </div>
+    <div
+      v-on:click="req_post()"
+    >
+      查询周边
     </div>
   </div>
+
+</div>
 </template>
 
 <script>
-
-import remoteLoad from '@/mapconfig/remoteLoad.js';
-import {MapKey,MapCityName} from '@/mapconfig/config.js';
-
 export default {
-  props: ['lat', 'lng'],
-  data () {
+  data(){
+    const self = this;
     return {
-      searchKey: '',
-      placeSearch: null,
-      dragStatus: false,
-      AMapUI: null,
-      AMap: null,
-      dragData: {
-        lng: null,
-        lat: null,
-        address: null,
-        nearestJunction: null,
-        nearestRoad: null,
-        nearestPOI: null
-      },
-    }
-  },
-  watch: {
-    searchKey () {
-      if (this.searchKey === '') {
-        this.placeSearch.clear()
-      }
-    }
-  },
-  methods: {
-    // 搜索
-    handleSearch () {
-      if (this.searchKey) {
-        this.placeSearch.search(this.searchKey)
-      }
-    },
-    // 实例化地图
-    initMap () {
-      // 加载PositionPicker，loadUI的路径参数为模块名中 'ui/' 之后的部分
-      let AMapUI = this.AMapUI = window.AMapUI
-      let AMap = this.AMap = window.AMap
-      AMapUI.loadUI(['misc/PositionPicker'], PositionPicker => {
-        let mapConfig = {
-          zoom: 16,
-          cityName: MapCityName
-        }
-        if (this.lat && this.lng) {
-          mapConfig.center = [this.lng, this.lat]
-        }
-        let map = new AMap.Map('js-container', mapConfig)
-        // 加载地图搜索插件
-        AMap.service('AMap.PlaceSearch', () => {
-          this.placeSearch = new AMap.PlaceSearch({
-            pageSize: 5,
-            pageIndex: 1,
-            citylimit: true,
-            city: MapCityName,
-            map: map,
-            panel: 'js-result'
-          })
-        })
-        // 启用工具条
-        AMap.plugin(['AMap.ToolBar'], function () {
-          map.addControl(new AMap.ToolBar({
-            position: 'RB'
-          }))
-        })
-        // 创建地图拖拽
-        let positionPicker = new PositionPicker({
-          mode: 'dragMap', // 设定为拖拽地图模式，可选'dragMap'、'dragMarker'，默认为'dragMap'
-          map: map // 依赖地图对象
-        })
-        // 拖拽完成发送自定义 drag 事件
-        positionPicker.on('success', positionResult => {
-          // 过滤掉初始化地图后的第一次默认拖放
-          if (!this.dragStatus) {
-            this.dragStatus = true
-          } else {
-            this.$emit('drag', positionResult)
+      search_key: '',
+      center: [121.59996, 31.197646],
+      lng: 0,
+      lat: 0,
+      loaded: false,
+      plugin: [{
+        enableHighAccuracy: true,//是否使用高精度定位，默认:true
+        timeout: 100,          //超过10秒后停止定位，默认：无穷大
+        maximumAge: 0,           //定位结果缓存0毫秒，默认：0
+        convert: true,           //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
+        showButton: true,        //显示定位按钮，默认：true
+        buttonPosition: 'RB',    //定位按钮停靠位置，默认：'LB'，左下角
+        showMarker: true,        //定位成功后在定位到的位置显示点标记，默认：true
+        showCircle: true,        //定位成功后用圆圈表示定位精度范围，默认：true
+        panToLocation: true,     //定位成功后将定位到的位置作为地图中心点，默认：true
+        zoomToAccuracy:true,//定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：f
+        extensions:'all',
+        pName: 'Geolocation',
+        events: {
+          init(o) {
+            // o 是高德地图定位插件实例
+            o.getCurrentPosition((status, result) => {
+              console.log(result);
+              if (result && result.position) {
+                self.lng = result.position.lng;
+                self.lat = result.position.lat;
+                self.center = [self.lng, self.lat];
+                self.loaded = true;
+                self.$nextTick();
+              }
+            });
           }
-        })
-        // 启动拖放
-        positionPicker.start()
-      })
-    },
-    dragMap (data) {
-      this.dragData = {
-        lng: data.position.lng,
-        lat: data.position.lat,
-        address: data.address,
-        nearestJunction: data.nearestJunction,
-        nearestRoad: data.nearestRoad,
-        nearestPOI: data.nearestPOI
-      }
+        }
+      }]
     }
   },
-  async created () {
-    // 已载入高德地图API，则直接初始化地图
-    if (window.AMap && window.AMapUI) {
-      this.initMap()
-    // 未载入高德地图API，则先载入API再初始化
-    } else {
-      await remoteLoad(`http://webapi.amap.com/maps?v=1.3&key=${MapKey}`)
-      await remoteLoad('http://webapi.amap.com/ui/1.0/main.js')
-      this.initMap()
+  watch:{
+    search_key(){
+      this.searchPlace();
     }
-  }
-}
+  } ,
+  methods:{
+    searchPlace(){
+      // console.log(this.search_key);
+      
+    }
+  } 
+}    
 </script>
 
 <style lang="scss" scoped>
-.m-map{ min-width: 500px; min-height: 300px; position: relative;width:100%;
-height:r(600); }
-.m-map .map{ width: 100%; height: 100%; }
-.m-map .search{ position: absolute; top: 10px; left: 10px; width: 285px; z-index: 1; }
-.m-map .search input{ width: 180px; border: 1px solid #ccc; line-height: 20px; padding: 5px; outline: none; }
-.m-map .search button{ line-height: 26px; background: #fff; border: 1px solid #ccc; width: 50px; text-align: center; }
-.m-map .result{ max-height: 300px; overflow: auto; margin-top: 10px; }
+.amap-demo {
+  height: 300px;
+}
 </style>

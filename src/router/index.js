@@ -187,6 +187,14 @@ const routes = [
           title: "消息设置",
         }
       },
+      {
+        path: "testloadmap",
+        name:"testloadmap",
+        component: () => import("@/components/testloadmap.vue"),
+        meta: {
+          title: "测试地图",
+        }
+      },
       // {
       //   path: "goodsInfo",
       //   name:"goodsInfo",
@@ -217,31 +225,30 @@ const router = new VueRouter({
 //全局的路由钩子函数
 router.beforeEach((to, from, next) => {
   const isLogin = localStorage.ele_login ? true : false;
-  if(to.path === '/login'){
-    next();  
-  }else{
-    // 判断是否在登录状态下
-    isLogin ? next() : next('/login');
-  }
-  // if (to.path == "/") {
-  //   if (params.userType === "index") {
-  //     next({
-  //       path: "/index"
-  //     });
-  //   } else if (params.userType === "order") {
-  //     next({
-  //       path: "/order"
-  //     });
-  //   } else if (params.userType === "login") {
-  //     next({
-  //       path: "/login"
-  //     });
-  //   }else{
-  //     next();
-  //   }
+  // if(to.path === '/login'){
+  //   next();  
   // }else{
-  //   next();
-  // } 
+  //   // 判断是否在登录状态下
+  //   isLogin ? next() : next('/login');
+  // }
+  if (to.path == "/") {
+    if (params.userType === "index") {
+      next({
+        path: "/index"
+      });
+    } else if (params.userType === "order") {
+      next({
+        path: "/order"
+      });
+    } else if (params.userType === "login") {
+      next({path: "/login"});
+    }else{
+      isLogin ? next() : next('/login');
+      // next();
+    }
+  }else{
+    next();
+  } 
 });
 
 router.afterEach((to, from) => {

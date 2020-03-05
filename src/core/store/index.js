@@ -4,48 +4,56 @@ import  apis from "@/core/api/apis"
 
 Vue.use(Vuex);       //this.$store.state
 
+// 设置定位类型
+const locationTypes = {
+  SET_LOCATION:"SET_LOCATION",
+  SET_ADDRESS:"SET_ADDRESS"
+}
+
 export default new Vuex.Store({
   state: {
-    currentCity:{},
-    loginData:{},
+    // 当前位置信息
+    location:{},
+    // 当前地址
+    address:"",
   },
-  mutations:{
-    // getCurrentCity(state,data){
-    //   console.log(data);
-    //   state.currentCity = JSON.parse(JSON.stringify(data));
-    //   console.log(state.currentCity);
-    // },
-    getCurrentInfo(state,data){
-      state.currentInfo = JSON.parse(JSON.stringify(data));
-      // console.log(state.currentInfo);
-    },
-    getLoginData(state,data){
-      state.loginData = JSON.parse(JSON.stringify(data));
-    }
-  },
+
   getters:{
-            //类似 组件内的 computed,函数名字 直接当变量去用
-    count(state){
-      return state.num*state.price;
-    },
-    getRole: state => {
-      return state.role
-    }
-
+    // 位置获取
+    location:state => state.location,
+    // 地址获取
+    address:state => state.address
   },
+
+  mutations:{
+    // 位置处理
+    [locationTypes.SET_LOCATION](state,location){
+      if(location){
+        state.location = location;
+      }else{
+        state.location = null;
+      }
+    },
+
+    // 地址处理
+    [locationTypes.SET_ADDRESS](state,address){
+      if(address){
+        state.address = address;
+      }else{
+        state.address = "";
+      }
+    }
+  },
+
   actions:{
-      //actions 异步函数,一般写通用接口
-      //固定写法第一个参数 写一个 context    //state  getters  commit dispatch
-      // actions 里面的方法 使用  dispatch 调用
-      getTestData(context,data){
-        // console.log(context); 
-        console.log(data);
-        apis.getTest().then((res)=>{
-          context.state.goodsList=res.data.data;
-          console.log( context.state.goodsList);
-        })
-      },
+    // 位置
+    setLocation:({commit},location) => {
+      commit(locationTypes.SET_LOCATION,location);
+    },
+
+    // 地址
+    setAddress:({commit},address) => {
+      commit(locationTypes.SET_ADDRESS,address);
+    },
   }
-
-
 })

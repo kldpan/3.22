@@ -2,7 +2,7 @@ import axios from "axios";
 
 // instance即封装好的axios,全局注册后直接调用即可
 var instance = axios.create({
-  baseURL: "192.168.0.116:8080",
+  baseURL: "",
   timeout: 10000,
   transformRequest: [
     function(data) {

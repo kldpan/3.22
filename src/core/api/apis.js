@@ -22,38 +22,29 @@ class Apis {
     }
 
     // 贝思客测试接口
-    getTest02(){
-        return request({
-             method:"GET",
-             url:poxy + "/json1811.ashx",
-             params:{
-                 c : 'NewIndexController',
-                 m : 'index',
-                 v : params.v
-             }
-         })
-     }
+    // getTest02(){
+    //     return request({
+    //          method:"GET",
+    //          url:poxy + "/json1811.ashx",
+    //          params:{
+    //              c : 'NewIndexController',
+    //              m : 'index',
+    //              v : params.v
+    //          }
+    //      })
+    //  }
 
 
     //  后端首页接口测试
-    getTest03(){
-        return request({
-             method:"GET",
-             url:"http://192.168.0.109" + '/api/goodssource',
-             params:{
+    // getTest03(){
+    //     return request({
+    //          method:"GET",
+    //          url:"http://192.168.0.109" + '/api/goodssource',
+    //          params:{
                  
-             }
-         })
-    }
-
-    // 后端数据传送测试
-    sendTest01(){
-        return request({
-            method:"GET",
-            url:"http://192.168.0.116:8080/" + 'login/sendCode',
-            params:{test:{a:1,b:2,c:3}},
-        })
-    }
+    //          }
+    //      })
+    // }
 
 
 

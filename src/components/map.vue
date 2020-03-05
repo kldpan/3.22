@@ -159,10 +159,10 @@ export default {
     },
     mounted(){
       this.adMap();
-      this.currentPosition = this.$store.state.currentCity;
-      // this.adMap();
-      setTimeout(()=>{console.log(this.currentPosition);},1500)
-      console.log(this);
+      // this.currentPosition = this.$store.state.currentCity;
+      // // this.adMap();
+      // setTimeout(()=>{console.log(this.currentPosition);},1500)
+      // console.log(this);
     },
     methods:{
       // 初始化地图方法

@@ -8,11 +8,11 @@
            <div class="sendIcon-n1">装</div>
          </div>
          <div class="send-n1-address fl"> 
-           <div class="send-n1-big-area" @click="toPath('/loadmap')">{{current.status ? current.addressComponent.province + ' / ' + current.addressComponent.city : '填写城市 / 区域'}}</div>
-           <div class="send-n1-small-area">点击输入详地址</div>
+           <div class="send-n1-big-area" @click="toPath('/loadmap')">{{loadCityArea}}</div>
+           <div class="send-n1-small-area">{{loadDetailAddress}}</div>
          </div>
          <div class="sendMore-n1 fr">
-           <span class="sendMore-n1-span" @click="setBool()" v-show="!bool"></span>
+           <span class="sendMore-n1-span" v-show="!bool"></span>
          </div>
       </div>
 
@@ -40,7 +40,7 @@
            <div class="receive-n1-small-area">点击输入详地址</div>
          </div>
          <div class="receiveMore-n1 fr">
-           <span class="receiveMore-n1-span" @click="setShowNum(1)" v-show="!showNum"></span>
+           <span class="receiveMore-n1-span" v-show="!showNum"></span>
          </div>
       </div>
 
@@ -131,7 +131,7 @@
       </div>
       <div class="permanentdata" v-if="testData.length !== 0">
         <ul>
-          <li v-for="(item,index) in testData" :key="index">{{item.id}}</li>
+          <li v-for="(item,index) in testData" :key="index">{{item.title}}</li>
         </ul>
       </div>
       <div class="permanent-content" v-else="testData.length === 0">
@@ -205,13 +205,15 @@
     </div>
 
     <!-- 定位（不出现地图，直接定位） -->
-    <div class="amap-page-container">
+    <!-- <div class="amap-page-container">
       <div :style="{width:'100%',height:'100px'}">
         <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center">
         </el-amap>
       </div>
-    </div>
+    </div> -->
+    <div class="container" style="width:300px;height:150px;background:pink">
 
+    </div>
 
 
 
@@ -253,71 +255,20 @@ export default {
       current:{},
       testData:[],
       currentPosition:'',
-
-      center: [121.59996, 31.197646],
-      lng: 0,
-      lat: 0,
-      loaded: false,
-      plugin: [{
-        enableHighAccuracy: true,//是否使用高精度定位，默认:true
-        timeout: 100,          //超过10秒后停止定位，默认：无穷大
-        maximumAge: 0,           //定位结果缓存0毫秒，默认：0
-        convert: true,           //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
-        showButton: true,        //显示定位按钮，默认：true
-        buttonPosition: 'RB',    //定位按钮停靠位置，默认：'LB'，左下角
-        showMarker: true,        //定位成功后在定位到的位置显示点标记，默认：true
-        showCircle: true,        //定位成功后用圆圈表示定位精度范围，默认：true
-        panToLocation: true,     //定位成功后将定位到的位置作为地图中心点，默认：true
-        zoomToAccuracy:true,//定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：f
-        extensions:'all',
-        pName: 'Geolocation',
-        events: {
-          init(o) {
-            // o 是高德地图定位插件实例
-            o.getCurrentPosition((status, result) => {
-              console.log(result);
-              self.$nextTick();
-              // 将当前定位信息放在this.current中（深度拷贝）
-              self.current = JSON.parse(JSON.stringify(result));
-              let currentInfo = JSON.parse(JSON.stringify(result));
-              self.$store.commit('getCurrentInfo',currentInfo);
-              // 模拟将需要的数据存放在vuex中以供随时取用
-              // let res = result.addressComponent;
-              // let temp = {
-              //   province: res.province,
-              //   city: res.city,
-              //   district: res.district,
-              //   township: res.township,
-              //   street: res.street,
-              //   streetNumber:res.streetNumber,
-              //   currentC ity:result.formattedAddress
-              // };
-              // self.$store.commit('getCurrentCity',temp);
-
-
-              // if (result && result.position) {
-              //   self.lng = result.position.lng;
-              //   self.lat = result.position.lat;
-              //   self.center = [self.lng, self.lat];
-              //   self.loaded = true;
-              //   self.$nextTick();
-              // }
-            });
-          }
-        }
-      }]
+      loadCityArea:'填写城市 / 区域',
+      loadDetailAddress:'点击输入详细地址',
     }
   },
   mounted() {
-
-    console.log(this.current);
-
-    setTimeout(()=>{
-      console.log(this.current);
-      localStorage.setItem('current',JSON.stringify(this.current));
-    },1000)
+    // 进入首页从vuex中将location和address取出
+    if(this.$store.state.location.status === 1){
+      this.loadCityArea = this.$store.state.location.addressComponent.province + ' / ' + this.$store.state.location.addressComponent.city;
+      this.loadDetailAddress = this.$store.state.location.addressComponent.district + this.$store.state.location.addressComponent.township + this.$store.state.location.addressComponent.street + this.$store.state.location.addressComponent.streetNumber;
+    }
     
-    // cnode数据
+    
+
+    // cnode测试数据
     this.$apis.getTest01().then((res) => {
       let resData = res.data.data;
       for(let i=0; i<resData.length; i++){
@@ -328,19 +279,16 @@ export default {
     });
 
     // 后端接口数据
-    this.$apis.getTest03().then((res)=>{
-      console.log(res.data.data);
-      let resData = res.data.data;
-      for(let i=0; i<resData.length; i++){
-        setTimeout(()=>{
-          this.testData.push(resData[i]);
-        },2000)
-      }
-    })
+    // this.$apis.getTest03().then((res)=>{
+    //   console.log(res.data.data);
+    //   let resData = res.data.data;
+    //   for(let i=0; i<resData.length; i++){
+    //     setTimeout(()=>{
+    //       this.testData.push(resData[i]);
+    //     },2000)
+    //   }
+    // })
 
-    // this.currentLocation = JSON.parse(JSON.stringify(this.$store.state.currentCity));
-    // console.log(this.$store.state.currentCity);
-    // console.log(this.currentLocation);
   },
   methods: {
     changeLoadWay(item,index){
@@ -472,6 +420,7 @@ export default {
             color:#333;
             line-height: r(88);
             font-weight: 500;
+            overflow:hidden;
           }
           .send-n1-small-area{
             width:r(546);
@@ -480,6 +429,7 @@ export default {
             color:#999;
             line-height: r(88);
             font-weight: 500;
+            overflow:hidden;
           }
         }
         .sendMore-n1{

@@ -142,7 +142,23 @@ export default {
       detailedAddress:'',
       bool: false,                          //bool值控制搜索得焦后出现的页面
       testData:[],
+      // 地址
       dragAddress:[],
+      autoAddress:"",
+      searchAddress:"",
+      userInputAddress:"",
+      // 联系人
+      userInputName:"",
+      autoName:"",
+      // 电话
+      userInputPhone:"",
+      autoPhone:"",
+      // 提交表单
+      loaderInfo:{
+        senderName:"",
+        senderPhone:"",
+        senderAdd:""
+      },
 
       // 地图数据 ↓
       // center: [121.59996, 31.197646],
@@ -201,7 +217,6 @@ export default {
   },
   async mounted(){
     this.adMap();
-    console.log(AMap);
     // this.dragMapAddressToDetails();
 
     this.$apis.getTest01().then((res) => {

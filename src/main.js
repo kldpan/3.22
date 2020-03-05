@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import AMap from 'vue-amap'
-console.log(AMap);
 import VueTouch from 'vue-touch'
 
 import App from './App.vue'
