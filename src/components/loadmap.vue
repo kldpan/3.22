@@ -2,7 +2,7 @@
   <div class="mymap">
     <!-- 第一层搜索 -->
     <div class="search-area clearfix">
-      <div class="back fl" @click="back()"></div>
+      <div class="back fl" @click="toMap()"></div>
       <div class="search-box fl">
         <span class="searchIcon fl"></span>
         <div class="searchandclear fl">
@@ -11,7 +11,7 @@
         </div>
         <div class="icons fr">
           <span class="voiceIcon"></span>
-          <span class="bigCity">bigCity</span>
+          <span class="bigCity">{{}}</span>
           <span class="popup"></span>
         </div>
         
@@ -26,10 +26,11 @@
     </div>
 
     <!-- 第三层搜索列表 -->
-    <div class="search-list" v-if="search_key">
+    <!-- <div class="search-list" v-if="search_key"> -->
+      <div class="search-list" v-if="searchListBool">
     <!-- <div class="search-list" v-if="search_list.length !== 0"> -->
       <ul>
-        <li v-for="(item,index) in search_list" :key="index" @click="onSearchLi(item.location)" class="searchlist clearfix">
+        <li v-for="(item,index) in search_list" :key="index" @click="mapToThisAddress(item)" class="searchlist clearfix">
           <span class="maplocationicon fl"></span>
           <div class="searchaddressarea fl">
             <div class="name">{{item.name}}</div>
@@ -92,7 +93,7 @@
       <!-- 第二层 -->
       <div class="floor-n2">
         <span class="locationIcon"></span>
-        <input type="text" placeholder="详细地址（精确到门牌号）" v-model="detailedAddress" >
+        <input type="text" placeholder="详细地址（精确到门牌号）" v-model="detailedAddress" @input="getUserInputAddress()" @focus="clearDetailedAddress()">
       </div>
 
       <!-- 第三层 -->
@@ -142,9 +143,21 @@ export default {
       detailedAddress:'',
       bool: false,                          //bool值控制搜索得焦后出现的页面
       testData:[],
+      searchListBool:false,
+
+      // 首页定位到的vuex中存储的地址信息
+      autoAddressInfo:{},
+      // 用户搜索点击过的地址信息
+      userSearchAddressInfo:{},
+      // 用户拖动地图后的地址信息
+      userDragMapAddressInfo:{},
+      // 用户手动输入的地址信息
+      userInputAddressInfo:"",
+
+
       // 地址
       dragAddress:[],
-      autoAddress:"",
+      // autoAddress:"",
       searchAddress:"",
       userInputAddress:"",
       // 联系人
@@ -162,7 +175,8 @@ export default {
 
       // 地图数据 ↓
       // center: [121.59996, 31.197646],
-      center: [106.532357,29.57212],        //纬度-经度
+      // center: [106.532357,29.57212],        //纬度-经度
+      center: [this.$store.state.location.position.lng || 106.532357,this.$store.state.location.position.lat || 29.57212],
       lng: 0,
       lat: 0,
       loaded: false,
@@ -183,29 +197,10 @@ export default {
           init(o) {
             // o 是高德地图定位插件实例
             o.getCurrentPosition((status, result) => {
-              console.log(result);
-              // if (result && result.position) {
-              //   self.lng = result.position.lng;
-              //   self.lat = result.position.lat;
-              //   self.center = [self.lng, self.lat];
-              //   self.loaded = true;
-              //   self.$nextTick();
-              // }
-
-              // // 将当前定位信息放在this.current中（深度拷贝）
-              // self.currentPosition = JSON.parse(JSON.stringify(result));
-              // // 声明模板数据，将数据存入vuex中
-              // var temp = {
-              //   province: res.province,
-              //   city: res.city,
-              //   district: res.district,
-              //   township: res.township,
-              //   street: res.street,
-              //   streetNumber:res.streetNumber,
-              //   currentCity:result.formattedAddress
-              // };
-              // self.$store.commit('getCurrentCity',temp);
-
+              // console.log(result);
+              if(!self.$store.state){
+                this.autoAddressInfo = result;
+              }
             });
           }
         }
@@ -216,17 +211,19 @@ export default {
     }
   },
   async mounted(){
+    this.autoAddressInfo = this.$store.state.location;
     this.adMap();
+
     // this.dragMapAddressToDetails();
 
-    this.$apis.getTest01().then((res) => {
-      let resData = res.data.data;
-      for(let i=0; i<resData.length; i++){
-        setTimeout(()=>{
-          this.testData.push(resData[i]);
-        },2000)
-      }
-    });
+    // this.$apis.getTest01().then((res) => {
+    //   let resData = res.data.data;
+    //   for(let i=0; i<resData.length; i++){
+    //     setTimeout(()=>{
+    //       this.testData.push(resData[i]);
+    //     },2000)
+    //   }
+    // });
 
   },
   methods:{
@@ -235,9 +232,9 @@ export default {
       // console.log(AMap);
       //初始化地图
       var map = new AMap.Map('container',{
-        zoom: 19,      //缩放级别
-        // center: this.center, //设置地图中心点
-        center: [106.532357,29.57212],
+        zoom: 14,      //缩放级别
+        center: this.center, //设置地图中心点
+        // center: [this.$store.state.location.position.lng || 106.532357,this.$store.state.location.position.lat || 29.57212],
         resizeEnable: true, //地图初始化加载定位到当前城市
       });
       //获取初始中心点并赋值
@@ -271,7 +268,9 @@ export default {
         placeSearch.searchNearBy('', [this.center[0],this.center[1]], 200, (status, result) => {
           if(status == 'complete'){
             this.lists = result.poiList.pois//将查询到的地点赋值
-            console.log(result);
+            // console.log(result);
+            this.userDragMapAddressInfo = result;
+            console.log(this.userDragMapAddressInfo);
             this.dragAddress = this.lists;
             this.dragMapAddressToDetails();
           }
@@ -280,6 +279,9 @@ export default {
     },
     // 搜索方法
     keySearch(){
+      if(this.search_list){
+        this.searchListBool = true;
+      }
       AMap.service(["AMap.PlaceSearch"], () => {
         //构造地点查询类
         var placeSearch = new AMap.PlaceSearch({
@@ -316,10 +318,15 @@ export default {
       this.search_key = '';
     },
     back(){
-      this.$router.go(0);
+      this.$router.go(-1);
     },
     toMap(){
-      this.bool = false;
+      if(this.bool){
+        this.bool = false;
+      }else{
+        this.back();
+      }
+      
     },
     toPath(url){
       this.$router.push(url);
@@ -350,16 +357,38 @@ export default {
     // 拖动地址改变内容
     dragMapAddressToDetails(){
       // console.log(this.$refs.senderInfo.children[1].children[1].value);
-      this.$refs.senderInfo.children[1].children[1].value = this.dragAddress[0].address;
-    }
+      this.detailedAddress = this.dragAddress[0].address || this.$store.state.location.addressComponent.district + this.$store.state.location.addressComponent.township + this.$store.state.location.addressComponent.street + this.$store.state.location.addressComponent.streetNumber;
+    },
+
+    // 点击搜索结果地图跳到指定位置
+    mapToThisAddress(item){
+      this.searchListBool = false;
+      this.bool = false,
+      this.search_key = '';
+      this.center = [item.location.lng,item.location.lat];
+      this.adMap();
+    },
+
+    clearDetailedAddress(){
+      this.detailedAddress = "";
+    },
+
+    // 用户输入地址
+    getUserInputAddress(){
+      // console.log(111)
+    },
   },
   watch: {
     search_key(newv,oldv){
       if(newv == ''){
         this.search_list = [];
         this.noSearchShow = false;
-        this.bool = true;
+        // this.bool = true;
       }
+    },
+    detailedAddress(){
+      this.userInputAddressInfo = this.detailedAddress;
+      console.log(this.userInputAddressInfo);
     }
   },
 };
@@ -477,7 +506,7 @@ export default {
         margin:auto;
         width:r(45);
         height: r(61);
-        background:url('../assets/upload.png') no-repeat;
+        background:url('../assets/load.png') no-repeat;
         background-size:r(45) r(61);
         // z-index:10000;
         // background:#000;

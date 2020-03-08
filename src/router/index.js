@@ -60,6 +60,14 @@ const routes = [
         }
       },
       {
+        path: "order02",
+        name:"order02",
+        component: () => import("@/components/order02.vue"),
+        meta: {
+          title: "测试",
+        }
+      },
+      {
         path: "logout",
         name:"logout",
         component: () => import("@/components/mine/logout.vue"),

@@ -338,7 +338,6 @@ export default {
   },
   watch: {
     search_key(newv,oldv){
-        console.log();
       if(newv == ''){
         this.search_list = [];
         this.noSearchShow = false;
