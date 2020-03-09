@@ -68,6 +68,14 @@ const routes = [
         }
       },
       {
+        path: "citypicker",
+        name:"citypicker",
+        component: () => import("@/components/citypicker.vue"),
+        meta: {
+          title: "测试",
+        }
+      },
+      {
         path: "logout",
         name:"logout",
         component: () => import("@/components/mine/logout.vue"),

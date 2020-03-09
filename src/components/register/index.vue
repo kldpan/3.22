@@ -62,8 +62,8 @@
 <script>
 import Vue from "vue";
 import Timer from "./timer.vue";
-import {Toast} from "mint-ui";
-Vue.use(Toast);
+// import {Toast} from "mint-ui";
+// Vue.use(Toast);
 export default {
   data(){
     return {
@@ -154,7 +154,7 @@ export default {
     sendcodes(cd) {
         if (this.form2.username == '') {
             // this.common.msg('fail','请输入手机号');
-            Toast('请输入手机号')
+            // Toast('请输入手机号')
             return;
         }
         let data = {
@@ -287,7 +287,7 @@ export default {
             this.form1.password = localData.password
         }
         if (this.form1.username == '' || this.form1.password == '') { //验证表单的输入
-            Toast('请输入用户名和密码')
+            ('请输入用户名和密码')
             this.offGray = false
             return;
         }

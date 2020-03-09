@@ -5,6 +5,10 @@ import VueTouch from 'vue-touch'
 import App from './App.vue'
 import router from './router'
 
+// 要么在全局注册组件，组件中直接调用，要么在组件中引入并调用
+// import { MessageBox } from "mint-ui";
+// Vue.use(MessageBox);
+
 import store from '@/core/store'
 
 import http from '@/core/api/http.js'

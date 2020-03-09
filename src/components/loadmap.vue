@@ -11,7 +11,7 @@
         </div>
         <div class="icons fr">
           <span class="voiceIcon"></span>
-          <span class="bigCity">{{}}</span>
+          <span class="bigCity" @click="cityPicker()">{{autoAddressInfo.addressComponent.district || '正在定位'}}</span>
           <span class="popup"></span>
         </div>
         
@@ -52,13 +52,14 @@
         </li>
         <li class="currentposition">
           <span class="maplocationicon fl"></span>
-          <div class="addressarea fl">
+          <div class="addressarea fl" v-if="autoAddressInfo">
             <div class="roughaddressarea">
-              <span class="roughaddress">{{'大地址'}}</span>
+              <span class="roughaddress">{{autoAddressInfo.addressComponent.township + autoAddressInfo.addressComponent.street}}</span>
               <span class="notice">当前</span>
             </div>
-            <div class="detailedaddress">{{'小地址小地址小地址小地址小地址小地址小地址'}}</div>
+            <div class="detailedaddress">{{autoAddressInfo.formattedAddress}}</div>
           </div>
+          <div v-else="autoAddressInfo">正在定位</div>
         </li>
       </ul>
 
@@ -110,28 +111,33 @@
       </div>
 
       <!-- 第四层 -->
-      <div class="submit" @click="toUnloadMap()">
+      <div class="submit" @click="test()">
         <div class="subbtn">确定</div>
       </div>
 
-
     </div>
 
-    <div class="amap-page-container">
+    <!-- <div class="amap-page-container">
       <div :style="{width:'0',height:'0px'}">
         <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center">
         </el-amap>
       </div>
+    </div> -->
+
+    <div class="citypickermodal" v-if="cityPickerModalBool">
+      <div class="citypickerarea">
+        
+      </div>
     </div>
-
-
 
   </div>
 
 </template>
 
 <script>
-
+import Vue from 'vue';
+// import { MessageBox } from 'mint-ui';
+// Vue.use(MessageBox);
 export default {
   data(){
     const self = this;
@@ -144,6 +150,7 @@ export default {
       bool: false,                          //bool值控制搜索得焦后出现的页面
       testData:[],
       searchListBool:false,
+      cityPickerModalBool:false,
 
       // 首页定位到的vuex中存储的地址信息
       autoAddressInfo:{},
@@ -176,7 +183,8 @@ export default {
       // 地图数据 ↓
       // center: [121.59996, 31.197646],
       // center: [106.532357,29.57212],        //纬度-经度
-      center: [this.$store.state.location.position.lng || 106.532357,this.$store.state.location.position.lat || 29.57212],
+      center: [this.$store.state.location.position.lng || '106.532357'
+      ,this.$store.state.location.position.lat || '29.57212'],
       lng: 0,
       lat: 0,
       loaded: false,
@@ -213,6 +221,7 @@ export default {
   async mounted(){
     this.autoAddressInfo = this.$store.state.location;
     this.adMap();
+    
 
     // this.dragMapAddressToDetails();
 
@@ -239,7 +248,7 @@ export default {
       });
       //获取初始中心点并赋值
       var currentCenter = map.getCenter();//此方法是获取当前地图的中心点
-      this.center = [currentCenter.lng,currentCenter.lat];//将获取到的中心点的纬度经度赋值给data的center
+      // this.center = [currentCenter.lng,currentCenter.lat];//将获取到的中心点的纬度经度赋值给data的center
       //根据地图中心点查附近地点，此方法在下方
       this.centerSearch();
       //监听地图移动事件，并在移动结束后获取地图中心点并更新地点列表
@@ -357,7 +366,8 @@ export default {
     // 拖动地址改变内容
     dragMapAddressToDetails(){
       // console.log(this.$refs.senderInfo.children[1].children[1].value);
-      this.detailedAddress = this.dragAddress[0].address || this.$store.state.location.addressComponent.district + this.$store.state.location.addressComponent.township + this.$store.state.location.addressComponent.street + this.$store.state.location.addressComponent.streetNumber;
+      this.detailedAddress = this.dragAddress[0].address;
+      //  || this.$store.state.location.addressComponent.district + this.$store.state.location.addressComponent.township + this.$store.state.location.addressComponent.street + this.$store.state.location.addressComponent.streetNumber
     },
 
     // 点击搜索结果地图跳到指定位置
@@ -367,6 +377,8 @@ export default {
       this.search_key = '';
       this.center = [item.location.lng,item.location.lat];
       this.adMap();
+      this.userSearchAddressInfo = item;
+      console.log(this.userSearchAddressInfo);
     },
 
     clearDetailedAddress(){
@@ -376,6 +388,10 @@ export default {
     // 用户输入地址
     getUserInputAddress(){
       // console.log(111)
+    },
+
+    cityPicker(){
+      this.cityPickerModalBool = true;
     },
   },
   watch: {
@@ -389,12 +405,12 @@ export default {
     detailedAddress(){
       this.userInputAddressInfo = this.detailedAddress;
       console.log(this.userInputAddressInfo);
-    }
+    },
   },
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .mymap{
     width:100%;
     height:r(1334);
@@ -849,5 +865,13 @@ export default {
         }
       }
     }    
+  }
+  .toasts{
+    background:red !important;
+    z-index:10000000000;
+  }
+  .messagebox{
+    background:red !important;
+    z-index:10000000000;
   }
 </style>

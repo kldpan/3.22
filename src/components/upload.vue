@@ -54,7 +54,7 @@
             plus.io.resolveLocalFileSystemURL(p, function(entry) {
               compressImage(entry.toLocalURL(),entry.name);
             }, function(e) {
-              plus.nativeUI.toast("读取拍照文件错误：" + e.message);
+              // plus.nativeUI.toast("读取拍照文件错误：" + e.message);
             });
           }, function(e) {
           }, {
