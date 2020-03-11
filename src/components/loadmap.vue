@@ -178,6 +178,7 @@ export default {
       userDragMapAddressInfo: {},
       // 用户手动输入的地址信息
       userInputAddressInfo: "",
+      userSearchToDecodeAddress: {},
 
       // 地址
       dragAddress: [],
@@ -190,13 +191,12 @@ export default {
       // 电话
       userInputPhone: "",
       autoPhone: "",
-      loadForm:{
-        senderName: "",
-        senderPhone: "",
-        senderAdd: "",
-        senderAddLng: "",
-        senderAddLat: ""
-      },
+      // 提交表单
+      senderName: "",
+      senderPhone: "",
+      senderAdd: "",
+      senderAddLng: "",
+      senderAddLat: "",
       
 
       // 地图数据 ↓
@@ -324,7 +324,7 @@ export default {
         //构造地点查询类
         var placeSearch = new AMap.PlaceSearch({
           type:
-            "政府机构及社会团体|公司企业|地名地址信息", // 兴趣点类别
+            "政府机构及社会团体|政府机构及社会团体|公司企业|地名地址信息", // 兴趣点类别
             // "汽车服务|餐饮服务|购物服务|生活服务|体育休闲服务|医疗保健服务|住宿服务|风景名胜|商务住宅|政府机构及社会团体|科教文化服务|交通设施服务|金融保险服务|公司企业|地名地址信息"
           pageSize: 30, // 单页显示结果条数
           pageIndex: 1, // 页码
@@ -334,6 +334,29 @@ export default {
         });
         //关键字查询
         placeSearch.search(this.search_key, (status, result) => {
+          console.log(result);
+          // 通过逆向编码将经纬度转为该关键字搜索位置的详细省市区地址
+          // AMap.plugin('AMap.Geocoder', function() {
+          //   var geocoder = new AMap.Geocoder({
+          //     // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
+          //     city: '全国'
+          //   })
+          //   // for(let i=0; i<result.poiList.pois.length; i++){
+
+          //   // }
+          //   // var lnglat = [result.poiList.pois];
+
+          //   geocoder.getAddress(lnglat, function(status, result) {
+          //     if (status === 'complete' && result.info === 'OK') {
+          //         // result为对应的地理位置详细信息
+          //         console.log(result);
+          //         self.detailedAddress = result.regeocode.formattedAddress; 
+          //         self.loadForm.senderAdd = result.regeocode.formattedAddress;
+          //     }
+          //   })
+          // })
+
+
           if (status == "complete") {
             if (result.poiList.count === 0) {
               this.noSearchShow = true;
@@ -408,9 +431,8 @@ export default {
       this.adMap();
       this.userSearchAddressInfo = item;
       console.log(this.userSearchAddressInfo);
-      this.loadForm.senderAddLng = item.location.lng;
-      this.loadForm.senderAddLat = item.location.lat;
-      console.log(this.loadForm);
+      this.senderAddLng = item.location.lng;
+      this.senderAddLat = item.location.lat;
       AMap.plugin('AMap.Geocoder', function() {
         var geocoder = new AMap.Geocoder({
           // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
@@ -423,8 +445,11 @@ export default {
           if (status === 'complete' && result.info === 'OK') {
               // result为对应的地理位置详细信息
               console.log(result);
-              self.detailedAddress = result.regeocode.formattedAddress; 
-              self.loadForm.senderAdd = result.regeocode.formattedAddress;
+              // self.detailedAddress = result.regeocode.formattedAddress; 
+              self.userSearchToDecodeAddress = result.regeocode;
+              console.log(self.userSearchToDecodeAddress);
+              self.senderAdd = self.userSearchToDecodeAddress.formattedAddress;
+              console.log(self.senderAdd);
           }
         })
       })
@@ -453,20 +478,18 @@ export default {
     },
     detailedAddress() {
       // 通过获取该地址的经纬度然后编码成全地址
-      this.loadForm.senderAddLng = this.userSearchAddressInfo.location.lng || this.userDragMapAddressInfo.poiList.pois[0].location.lng;
-      this.loadForm.senderAddLat = this.userSearchAddressInfo.location.lat || this.userDragMapAddressInfo.poiList.pois[0].location.lat;
-      console.log(this.loadForm);
+      this.senderAddLng = this.userSearchAddressInfo.location.lng || this.userDragMapAddressInfo.poiList.pois[0].location.lng;
+      this.senderAddLat = this.userSearchAddressInfo.location.lat || this.userDragMapAddressInfo.poiList.pois[0].location.lat;
       
-      // this.loadForm.senderAdd = this.detailedAddress;
       
     },
     userInputName(){
-      this.loadForm.senderName = this.userInputName;
-      console.log(this.loadForm);
+      this.senderName = this.userInputName;
+      console.log(this.senderName);
     },
     userInputPhone(){
-      this.loadForm.senderPhone = this.userInputPhone;
-      console.log(this.loadForm);
+      this.senderPhone = this.userInputPhone;
+      console.log(this.senderPhone);
     }
   }
 };

@@ -33,8 +33,8 @@ export default {
           name: "发货"
         },
         {
-          pathname: "order",
-          path: "/order",
+          pathname: "citypicker",
+          path: "/citypicker",
           ImgUrl:
             "http://m.qpic.cn/psc?/V14WvDya21PaU3/hsnfJ.a5yg7.BhItQyNwPdEWeLKwuX4D6tfrAzbdXBRd1ZUOC77l2tjV1WGtwbOfltLhfDWOLBGnfguY8gG2AjC64Tt1G4OSGByoG9aWDgE!/b&bo=LAAwAAAAAAADFy4!&rf=viewer_4",
           selectedImgUrl:

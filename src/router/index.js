@@ -70,7 +70,7 @@ const routes = [
       {
         path: "citypicker",
         name:"citypicker",
-        component: () => import("@/components/citypicker.vue"),
+        component: () => import("@/components/common/citypicker.vue"),
         meta: {
           title: "测试",
         }
