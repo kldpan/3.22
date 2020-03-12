@@ -24,7 +24,7 @@
             @click="cityPicker()"
             v-if="this.$store.state.address"
           >{{this.$store.state.location.addressComponent.district}}</span>
-          <span class="popup"></span>
+          <span :class="this.cityPickerBool ? 'popdown' : 'popup'"></span>
         </div>
       </div>
     </div>
@@ -110,25 +110,20 @@
       <!-- 第二层 -->
       <div class="floor-n2">
         <span class="locationIcon"></span>
-        <input
-          type="text"
-          placeholder="详细地址（精确到门牌号）"
-          v-model="detailedAddress"
-          
-        />
+        <input type="text" placeholder="详细地址（精确到门牌号）" v-model="detailedAddress" />
         <!-- @input="getUserInputAddress()"
-          @focus="clearDetailedAddress()" -->
+        @focus="clearDetailedAddress()"-->
       </div>
 
       <!-- 第三层 -->
       <div class="floor-n3 clearfix">
         <div class="sender fl">
           <span class="senderIcon"></span>
-          <input class="sendername" placeholder="联系人" v-model="userInputName"/>
+          <input class="sendername" placeholder="联系人" v-model="userInputName" />
         </div>
         <div class="phone fl">
           <span class="phoneIcon"></span>
-          <input class="phonenumber" placeholder="联系电话" v-model="userInputPhone"/>
+          <input class="phonenumber" placeholder="联系电话" v-model="userInputPhone" />
           <!-- <span class="contacts">通信录</span> -->
         </div>
       </div>
@@ -141,21 +136,20 @@
 
     <div class="amap-page-container">
       <div :style="{width:'0',height:'0px'}">
-        <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center">
-        </el-amap>
+        <el-amap vid="amap" :plugin="plugin" class="amap-demo" :center="center"></el-amap>
       </div>
     </div>
 
-    <div class="citypickermodal" v-if="cityPickerModalBool">
-      <div class="citypickerarea"></div>
-    </div>
+    <!-- 城市选择区 -->
+    <keep-alive>
+      <citypicker />
+    </keep-alive>
   </div>
 </template>
 
 <script>
 import Vue from "vue";
-// import { MessageBox } from 'mint-ui';
-// Vue.use(MessageBox);
+import citypicker from "@/components/common/citypicker.vue";
 export default {
   data() {
     const self = this;
@@ -168,7 +162,7 @@ export default {
       bool: false, //bool值控制搜索得焦后出现的页面
       testData: [],
       searchListBool: false,
-      cityPickerModalBool: false,
+      cityPickerBool: false,
 
       // 首页定位到的vuex中存储的地址信息
       autoAddressInfo: {},
@@ -179,6 +173,10 @@ export default {
       // 用户手动输入的地址信息
       userInputAddressInfo: "",
       userSearchToDecodeAddress: {},
+      // 用户选择的地址
+      userSelectedProvince: "",
+      userSelectedCity: "",
+      userSelectedDistrict: "",
 
       // 地址
       dragAddress: [],
@@ -197,14 +195,17 @@ export default {
       senderAdd: "",
       senderAddLng: "",
       senderAddLat: "",
-      
 
       // 地图数据 ↓
       // center: [121.59996, 31.197646],
       // center: [106.532357,29.57212],        //纬度-经度
       center: [
-        this.$store.state.address ? this.$store.state.location.position.lng : "106.532357",
-        this.$store.state.address ? this.$store.state.location.position.lat : "29.57212"
+        this.$store.state.address
+          ? this.$store.state.location.position.lng
+          : "106.532357",
+        this.$store.state.address
+          ? this.$store.state.location.position.lat
+          : "29.57212"
       ],
       lng: 0,
       lat: 0,
@@ -241,11 +242,15 @@ export default {
       // 地图数据 ↑
     };
   },
+  components: {
+    citypicker
+  },
   mounted() {
     this.autoAddressInfo = this.$store.state.location;
     this.adMap();
-    setTimeout(()=>{console.log(this.currentPositionInfo)},800);
-    
+    setTimeout(() => {
+      console.log(this.currentPositionInfo);
+    }, 800);
 
     // this.dragMapAddressToDetails();
 
@@ -323,9 +328,8 @@ export default {
       AMap.service(["AMap.PlaceSearch"], () => {
         //构造地点查询类
         var placeSearch = new AMap.PlaceSearch({
-          type:
-            "政府机构及社会团体|政府机构及社会团体|公司企业|地名地址信息", // 兴趣点类别
-            // "汽车服务|餐饮服务|购物服务|生活服务|体育休闲服务|医疗保健服务|住宿服务|风景名胜|商务住宅|政府机构及社会团体|科教文化服务|交通设施服务|金融保险服务|公司企业|地名地址信息"
+          type: "政府机构及社会团体|政府机构及社会团体|公司企业|地名地址信息", // 兴趣点类别
+          // "汽车服务|餐饮服务|购物服务|生活服务|体育休闲服务|医疗保健服务|住宿服务|风景名胜|商务住宅|政府机构及社会团体|科教文化服务|交通设施服务|金融保险服务|公司企业|地名地址信息"
           pageSize: 30, // 单页显示结果条数
           pageIndex: 1, // 页码
           city: "全国", // 兴趣点城市
@@ -350,12 +354,11 @@ export default {
           //     if (status === 'complete' && result.info === 'OK') {
           //         // result为对应的地理位置详细信息
           //         console.log(result);
-          //         self.detailedAddress = result.regeocode.formattedAddress; 
+          //         self.detailedAddress = result.regeocode.formattedAddress;
           //         self.loadForm.senderAdd = result.regeocode.formattedAddress;
           //     }
           //   })
           // })
-
 
           if (status == "complete") {
             if (result.poiList.count === 0) {
@@ -433,26 +436,26 @@ export default {
       console.log(this.userSearchAddressInfo);
       this.senderAddLng = item.location.lng;
       this.senderAddLat = item.location.lat;
-      AMap.plugin('AMap.Geocoder', function() {
+      AMap.plugin("AMap.Geocoder", function() {
         var geocoder = new AMap.Geocoder({
           // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
-          city: '全国'
-        })
-      
+          city: "全国"
+        });
+
         var lnglat = [item.location.lng, item.location.lat];
 
         geocoder.getAddress(lnglat, function(status, result) {
-          if (status === 'complete' && result.info === 'OK') {
-              // result为对应的地理位置详细信息
-              console.log(result);
-              // self.detailedAddress = result.regeocode.formattedAddress; 
-              self.userSearchToDecodeAddress = result.regeocode;
-              console.log(self.userSearchToDecodeAddress);
-              self.senderAdd = self.userSearchToDecodeAddress.formattedAddress;
-              console.log(self.senderAdd);
+          if (status === "complete" && result.info === "OK") {
+            // result为对应的地理位置详细信息
+            console.log(result);
+            // self.detailedAddress = result.regeocode.formattedAddress;
+            self.userSearchToDecodeAddress = result.regeocode;
+            console.log(self.userSearchToDecodeAddress);
+            self.senderAdd = self.userSearchToDecodeAddress.formattedAddress;
+            console.log(self.senderAdd);
           }
-        })
-      })
+        });
+      });
     },
 
     clearDetailedAddress() {
@@ -465,7 +468,12 @@ export default {
     },
 
     cityPicker() {
-      this.cityPickerModalBool = true;
+      this.$children[1].cityPickerBool = true;
+      if (this.$children[1].cityPickerBool) {
+        this.cityPickerBool = true;
+      } else {
+        this.cityPickerBool = false;
+      }
     }
   },
   watch: {
@@ -478,18 +486,41 @@ export default {
     },
     detailedAddress() {
       // 通过获取该地址的经纬度然后编码成全地址
-      this.senderAddLng = this.userSearchAddressInfo.location.lng || this.userDragMapAddressInfo.poiList.pois[0].location.lng;
-      this.senderAddLat = this.userSearchAddressInfo.location.lat || this.userDragMapAddressInfo.poiList.pois[0].location.lat;
-      
-      
+      this.senderAddLng =
+        this.userSearchAddressInfo.location.lng ||
+        this.userDragMapAddressInfo.poiList.pois[0].location.lng;
+      this.senderAddLat =
+        this.userSearchAddressInfo.location.lat ||
+        this.userDragMapAddressInfo.poiList.pois[0].location.lat;
     },
-    userInputName(){
+    userInputName() {
       this.senderName = this.userInputName;
       console.log(this.senderName);
     },
-    userInputPhone(){
+    userInputPhone() {
       this.senderPhone = this.userInputPhone;
       console.log(this.senderPhone);
+    },
+    userSelectedDistrict() {
+      console.log(this.userSelectedDistrict);
+      // 检测到用户选择的城市数据后，逆向编码获取该地区的经纬度并赋值给地图中心
+      AMap.plugin("AMap.Geocoder", function() {
+        var geocoder = new AMap.Geocoder({
+          // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
+          city: "全国"
+        });
+
+        geocoder.getLocation(self.userSelectedDistrict, (status, result) => {
+          setTimeout(() => {
+            console.log(status, result);
+          }, 3000);
+
+          if (status === "complete" && result.info === "OK") {
+            // result中对应详细地理坐标信息
+            console.log(result);
+          }
+        });
+      });
     }
   }
 };
@@ -583,6 +614,15 @@ export default {
           height: 0;
           border: r(8) solid;
           border-color: #666 transparent transparent transparent;
+          vertical-align: middle;
+          margin-left: r(10);
+        }
+        .popdown {
+          display: inline-block;
+          width: 0;
+          height: 0;
+          border: r(8) solid;
+          border-color: transparent transparent #666 transparent;
           vertical-align: middle;
           margin-left: r(10);
         }
