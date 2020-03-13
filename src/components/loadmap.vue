@@ -33,6 +33,12 @@
     <div class="mapbox">
       <div class="map" id="container" :plugin="plugin" vid="amap" :center="center"></div>
       <div class="sign"></div>
+      <div class="notebox" v-show="mapCenterNoteBoxBool">
+        <div class="addnote" ref="addnote">
+          <span>{{detailedAddress}}</span>
+        </div>
+        <div class="direct"></div>
+      </div>
     </div>
 
     <!-- 第三层搜索列表 -->
@@ -163,6 +169,7 @@ export default {
       testData: [],
       searchListBool: false,
       cityPickerBool: false,
+      mapCenterNoteBoxBool: false,
 
       // 首页定位到的vuex中存储的地址信息
       autoAddressInfo: {},
@@ -485,13 +492,20 @@ export default {
       }
     },
     detailedAddress() {
+      console.log(this.detailedAddress);
+      if (this.detailedAddress) {
+        this.mapCenterNoteBoxBool = true;
+        console.log(this.$refs);
+      } else {
+        this.mapCenterNoteBoxBool = false;
+      }
       // 通过获取该地址的经纬度然后编码成全地址
-      this.senderAddLng =
-        this.userSearchAddressInfo.location.lng ||
-        this.userDragMapAddressInfo.poiList.pois[0].location.lng;
-      this.senderAddLat =
-        this.userSearchAddressInfo.location.lat ||
-        this.userDragMapAddressInfo.poiList.pois[0].location.lat;
+      // this.senderAddLng =
+      //   this.userSearchAddressInfo.location.lng ||
+      //   this.userDragMapAddressInfo.poiList.pois[0].location.lng;
+      // this.senderAddLat =
+      //   this.userSearchAddressInfo.location.lat ||
+      //   this.userDragMapAddressInfo.poiList.pois[0].location.lat;
     },
     userInputName() {
       this.senderName = this.userInputName;
@@ -502,7 +516,12 @@ export default {
       console.log(this.senderPhone);
     },
     userSelectedDistrict() {
-      console.log(this.userSelectedDistrict);
+      let paramsAdd =
+        this.userSelectedProvince +
+        this.userSelectedCity +
+        this.userSelectedDistrict;
+      console.log(paramsAdd);
+
       // 检测到用户选择的城市数据后，逆向编码获取该地区的经纬度并赋值给地图中心
       AMap.plugin("AMap.Geocoder", function() {
         var geocoder = new AMap.Geocoder({
@@ -510,14 +529,23 @@ export default {
           city: "全国"
         });
 
-        geocoder.getLocation(self.userSelectedDistrict, (status, result) => {
-          setTimeout(() => {
-            console.log(status, result);
-          }, 3000);
-
+        geocoder.getLocation(paramsAdd, function(status, result) {
           if (status === "complete" && result.info === "OK") {
             // result中对应详细地理坐标信息
             console.log(result);
+            // 获取到该坐标值，换到地图中心
+            console.log(self.__VUE_HOT_MAP__);
+            for (let key in self.__VUE_HOT_MAP__) {
+              if (key === "3aeba454") {
+                let loadmapComponent = self.__VUE_HOT_MAP__[key].instances[0];
+                console.log(loadmapComponent.adMap);
+                loadmapComponent.center = [
+                  result.geocodes[0].location.lng,
+                  result.geocodes[0].location.lat
+                ];
+                loadmapComponent.adMap();
+              }
+            }
           }
         });
       });
@@ -631,12 +659,10 @@ export default {
   }
   // 地图层
   .mapbox {
-    // display: flex;
     .map {
       width: 100%;
       height: r(1334);
       position: absolute;
-      // opacity: 0.1;
     }
     .sign {
       position: absolute;
@@ -651,6 +677,49 @@ export default {
       background-size: r(45) r(61);
       // z-index:10000;
       // background:#000;
+    }
+    .notebox {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: r(250);
+      z-index: 100;
+      margin: auto;
+      width: 100%;
+      height: r(80);
+      background: red;
+      display: flex;
+      .addnote {
+        height: r(80);
+        // border: 1px solid;
+        border-radius: r(14);
+        text-align: center;
+        margin: auto;
+        background: #fff;
+        display: flex;
+        padding: 0 r(20);
+        box-shadow: 0px 0px r(20) rgba(0, 0, 0, 0.16);
+        span {
+          margin: auto;
+          color: #333;
+          font-size: r(26);
+          word-wrap: break-word;
+        }
+      }
+      .direct {
+        position: fixed;
+        left: 48.8%;
+        top: r(572);
+        z-index: 10;
+        width: r(20);
+        height: r(20);
+        // border-bottom: 1px solid;
+        // border-right: 1px solid;
+        transform: rotate(45deg);
+        background: #fff;
+        // box-shadow: 0 0 r(20) rgba(0, 0, 0, 0.16);
+      }
     }
   }
 
