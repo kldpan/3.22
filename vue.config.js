@@ -1,25 +1,26 @@
 var path = require("path");
 var webpack = require("webpack");
+
 function resolve(dir) {
   return path.join(__dirname, dir);
 }
 
 module.exports = {
-  publicPath: "./",
+  // publicPath: "./",
   devServer: {
     host: "0.0.0.0",
     port: 8899,
 
     // cnode代理
-    proxy: {
-      "/apis": {
-        target: "https://cnodejs.org",
-        changeOrigin: true,
-        pathRewrite: {
-          "^/apis": ""
-        }
-      },
-    },
+    // proxy: {
+    //   "/apis": {
+    //     target: "https://cnodejs.org",
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       "^/apis": ""
+    //     }
+    //   },
+    // },
 
     // 贝思客代理
     // proxy: {
@@ -31,6 +32,18 @@ module.exports = {
     //     }
     //   }
     // }
+
+    // 后端代理
+    proxy: {
+      "/api": {
+        target: process.env.API_HOST,
+        changeOrigin: true,
+        pathRewrite: {
+          "^/api": ""
+        }
+      },
+    },
+
   },
   chainWebpack: config => {
     config.resolve.alias.set("@", resolve("src"));
@@ -44,7 +57,7 @@ module.exports = {
     ],
     resolve: {
       alias: {
-        'vue$': 'vue/dist/vue.esm.js' 
+        'vue$': 'vue/dist/vue.esm.js'
       }
     }
   },

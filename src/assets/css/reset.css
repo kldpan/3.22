@@ -131,6 +131,6 @@ table {
 	clear: both;
 }
 
-.mytoast {
-	z-index: 100000000000000;
+body {
+	background: rgba(242, 246, 247, 1);
 }

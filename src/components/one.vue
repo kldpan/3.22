@@ -1,17 +1,24 @@
 <template>
   <div>
-    <button>One</button>
+    <mt-popup v-model="popupVisible" position="bottom">12345688546574684dfasf</mt-popup>
   </div>
 </template>
 
 <script>
+import Vue from "vue";
+import { Popup } from "mint-ui";
+Vue.component(Popup.name, Popup);
 export default {
-  mounted(){
-    console.log("One")
+  data() {
+    return {
+      popupVisible: true
+    };
+  },
+  mounted() {
+    console.log("One");
   }
 };
 </script>
 
 <style lang="scss" scoped>
-
 </style>

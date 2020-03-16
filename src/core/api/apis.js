@@ -1,22 +1,16 @@
-import request from "./http"  // request({})
+import request from "./http" // request({})
 import params from "./params"
 
-var poxy="/apis"
-var url1="/index"
-var url2="/user/topic"
-// var url3="/json1811.ashx"
-var url4="/api/goodssource"
-
-
+// var poxy = "/api"
 
 class Apis {
     // cnode接口
-    getTest01(){
-       return request({
-            method:"GET",
-            url:poxy+"/api/v1/topics",
-            headers:{
-                token:params.token
+    getTest01() {
+        return request({
+            method: "GET",
+            url: '/api/user/messages',
+            headers: {
+                token: params.token
             },
         })
     }
@@ -41,7 +35,7 @@ class Apis {
     //          method:"GET",
     //          url:"http://192.168.0.109" + '/api/goodssource',
     //          params:{
-                 
+
     //          }
     //      })
     // }
@@ -72,4 +66,4 @@ class Apis {
     // }
 }
 
-export default new Apis();  //{getTest:function(){}}
+export default new Apis(); //{getTest:function(){}}

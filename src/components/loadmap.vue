@@ -23,7 +23,7 @@
             class="bigCity"
             @click="cityPicker()"
             v-if="this.$store.state.address"
-          >{{this.$store.state.location.addressComponent.district}}</span>
+          >{{district.replace(/[\d]*/gi, "")}}</span>
           <span :class="this.cityPickerBool ? 'popdown' : 'popup'"></span>
         </div>
       </div>
@@ -33,9 +33,10 @@
     <div class="mapbox">
       <div class="map" id="container" :plugin="plugin" vid="amap" :center="center"></div>
       <div class="sign"></div>
-      <div class="notebox" v-show="mapCenterNoteBoxBool">
-        <div class="addnote" ref="addnote">
-          <span>{{detailedAddress}}</span>
+      <div v-show="mapCenterNoteBoxBool" class="notebox">
+        <!-- :class="detailedAddress.length >= 20 ? 'bignotebox' : 'notebox'" -->
+        <div :class="detailedAddress.length >= 50 ? 'bigaddnote' : 'addnote'">
+          <span>{{mapShowDetailedAddress}}</span>
         </div>
         <div class="direct"></div>
       </div>
@@ -82,7 +83,7 @@
             </div>
             <div class="detailedaddress">{{autoAddressInfo.formattedAddress}}</div>
           </div>
-          <div v-else="autoAddressInfo">正在定位</div>
+          <div v-else="autoAddressInfo" class="locating">正在定位</div>
         </li>
       </ul>
 
@@ -103,6 +104,11 @@
           </li>
         </ul>
       </div>
+    </div>
+
+    <!-- 回当前位置图标 -->
+    <div class="goback" @click="backCurrentPosition()">
+      <span class="gobackicon"></span>
     </div>
 
     <!-- 第四层信息 -->
@@ -135,7 +141,7 @@
       </div>
 
       <!-- 第四层 -->
-      <div class="submit" @click="test()">
+      <div class="submit" @click="submit()">
         <div class="subbtn">确定</div>
       </div>
     </div>
@@ -156,6 +162,7 @@
 <script>
 import Vue from "vue";
 import citypicker from "@/components/common/citypicker.vue";
+import address from "./common/address.json";
 export default {
   data() {
     const self = this;
@@ -164,12 +171,18 @@ export default {
       search_key: "", //搜索值
       search_list: [], //搜索结果列表
       noSearchShow: false, //无搜索结果提示，无搜索结果时会显示暂无搜索结果
-      detailedAddress: "",
+      detailedAddressInfo: {},
+      detailedAddress: this.$store.state.address
+        ? "this.$store.state.address"
+        : "",
+      mapShowDetailedAddress: "",
       bool: false, //bool值控制搜索得焦后出现的页面
       testData: [],
       searchListBool: false,
       cityPickerBool: false,
       mapCenterNoteBoxBool: false,
+      addressCode: 0,
+      district: this.$store.state.location.addressComponent.district,
 
       // 首页定位到的vuex中存储的地址信息
       autoAddressInfo: {},
@@ -286,6 +299,7 @@ export default {
       // this.center = [currentCenter.lng,currentCenter.lat];//将获取到的中心点的纬度经度赋值给data的center
       //根据地图中心点查附近地点，此方法在下方
       this.centerSearch();
+
       //监听地图移动事件，并在移动结束后获取地图中心点并更新地点列表
       var moveendFun = e => {
         // 获取地图中心点
@@ -293,6 +307,7 @@ export default {
         this.center = [currentCenter.lng, currentCenter.lat];
         //根据地图中心点查附近地点
         this.centerSearch();
+        // this.mapCenterNoteBoxBool = false;
       };
       // 绑定事件移动地图事件
       map.on("moveend", moveendFun);
@@ -318,10 +333,13 @@ export default {
             if (status == "complete") {
               this.lists = result.poiList.pois; //将查询到的地点赋值
               // console.log(result);
-              this.userDragMapAddressInfo = result;
+              this.userDragMapAddressInfo = result.poiList.pois[0];
+              this.senderAddLng = result.poiList.pois[0].location.lng;
+              this.senderAddLat = result.poiList.pois[0].location.lat;
               console.log(this.userDragMapAddressInfo);
-              this.dragAddress = this.lists;
-              this.dragMapAddressToDetails();
+              this.getCompeleteAddress(this.userDragMapAddressInfo);
+              // this.dragAddress = this.lists;
+              // this.dragMapAddressToDetails();
             }
           }
         );
@@ -346,27 +364,6 @@ export default {
         //关键字查询
         placeSearch.search(this.search_key, (status, result) => {
           console.log(result);
-          // 通过逆向编码将经纬度转为该关键字搜索位置的详细省市区地址
-          // AMap.plugin('AMap.Geocoder', function() {
-          //   var geocoder = new AMap.Geocoder({
-          //     // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
-          //     city: '全国'
-          //   })
-          //   // for(let i=0; i<result.poiList.pois.length; i++){
-
-          //   // }
-          //   // var lnglat = [result.poiList.pois];
-
-          //   geocoder.getAddress(lnglat, function(status, result) {
-          //     if (status === 'complete' && result.info === 'OK') {
-          //         // result为对应的地理位置详细信息
-          //         console.log(result);
-          //         self.detailedAddress = result.regeocode.formattedAddress;
-          //         self.loadForm.senderAdd = result.regeocode.formattedAddress;
-          //     }
-          //   })
-          // })
-
           if (status == "complete") {
             if (result.poiList.count === 0) {
               this.noSearchShow = true;
@@ -415,19 +412,18 @@ export default {
         this.clearSearch();
       }
     },
-    toUnloadMap() {
-      this.toPath("/unloadmap");
-      let senderInfo = {
-        senderAddress: "",
-        senderName: "",
-        senderPhone: ""
-      };
-      localStorage.setItem("senderInfo", senderInfo);
-    },
+    // toUnloadMap() {
+    //   this.toPath("/unloadmap");
+    //   let senderInfo = {
+    //     senderAddress: "",
+    //     senderName: "",
+    //     senderPhone: ""
+    //   };
+    //   localStorage.setItem("senderInfo", senderInfo);
+    // },
 
     // 拖动地址改变内容
     dragMapAddressToDetails() {
-      // console.log(this.$refs.senderInfo.children[1].children[1].value);
       this.detailedAddress = this.dragAddress[0].address;
       //  || this.$store.state.location.addressComponent.district + this.$store.state.location.addressComponent.township + this.$store.state.location.addressComponent.street + this.$store.state.location.addressComponent.streetNumber
     },
@@ -443,26 +439,7 @@ export default {
       console.log(this.userSearchAddressInfo);
       this.senderAddLng = item.location.lng;
       this.senderAddLat = item.location.lat;
-      AMap.plugin("AMap.Geocoder", function() {
-        var geocoder = new AMap.Geocoder({
-          // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
-          city: "全国"
-        });
-
-        var lnglat = [item.location.lng, item.location.lat];
-
-        geocoder.getAddress(lnglat, function(status, result) {
-          if (status === "complete" && result.info === "OK") {
-            // result为对应的地理位置详细信息
-            console.log(result);
-            // self.detailedAddress = result.regeocode.formattedAddress;
-            self.userSearchToDecodeAddress = result.regeocode;
-            console.log(self.userSearchToDecodeAddress);
-            self.senderAdd = self.userSearchToDecodeAddress.formattedAddress;
-            console.log(self.senderAdd);
-          }
-        });
-      });
+      this.getCompeleteAddress(item);
     },
 
     clearDetailedAddress() {
@@ -476,13 +453,121 @@ export default {
 
     cityPicker() {
       this.$children[1].cityPickerBool = true;
-      if (this.$children[1].cityPickerBool) {
-        this.cityPickerBool = true;
-      } else {
-        this.cityPickerBool = false;
+      // if (this.$children[1].cityPickerBool) {
+      //   this.cityPickerBool = true;
+      // } else {
+      //   this.cityPickerBool = false;
+      // }
+    },
+
+    backCurrentPosition() {
+      this.center = [
+        this.$store.state.address
+          ? this.$store.state.location.position.lng
+          : "106.532357",
+        this.$store.state.address
+          ? this.$store.state.location.position.lat
+          : "29.57212"
+      ];
+      this.adMap();
+    },
+
+    getCompeleteAddress(item) {
+      AMap.plugin("AMap.Geocoder", function() {
+        var geocoder = new AMap.Geocoder({
+          // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
+          city: "全国"
+        });
+
+        var lnglat = [item.location.lng, item.location.lat];
+
+        geocoder.getAddress(lnglat, function(status, result) {
+          if (status === "complete" && result.info === "OK") {
+            // result为对应的地理位置详细信息
+            console.log(result);
+            for (let key in self.__VUE_HOT_MAP__) {
+              if (key === "3aeba454") {
+                let loadmapComponent = self.__VUE_HOT_MAP__[key].instances[0];
+                setTimeout(() => {
+                  loadmapComponent.detailedAddressInfo = result.regeocode;
+                  loadmapComponent.detailedAddress =
+                    result.regeocode.formattedAddress;
+                  loadmapComponent.getAddCode();
+                  loadmapComponent.district =
+                    result.regeocode.addressComponent.district;
+                  loadmapComponent.mapShowDetailedAddress = result.regeocode.formattedAddress.replace(
+                    result.regeocode.addressComponent.province +
+                      result.regeocode.addressComponent.city +
+                      result.regeocode.addressComponent.district,
+                    ""
+                  );
+                  loadmapComponent.district =
+                    result.regeocode.addressComponent.district;
+                }, 200);
+              }
+            }
+          }
+        });
+      });
+    },
+
+    getAddCode() {
+      // console.log(this.detailedAddressInfo);
+      let searchProvince = this.detailedAddressInfo.addressComponent.province;
+      let searchCity = this.detailedAddressInfo.addressComponent.city;
+      let searchDistrict = this.detailedAddressInfo.addressComponent.district;
+      let searchTownship = this.detailedAddressInfo.addressComponent.township;
+      console.log(searchProvince, searchCity, searchDistrict, searchTownship);
+      // console.log(this.$children[1].selectProvince);
+      for (let i = 0; i < address.length; i++) {
+        if (searchProvince === address[i].name) {
+          console.log(address[i].code);
+          for (let j = 0; j < address[i].childs.length; j++) {
+            if ((searchCity || searchProvince) === address[i].childs[j].name) {
+              console.log(address[i].childs[j].code);
+              for (let p = 0; p < address[i].childs[j].childs.length; p++) {
+                if (searchDistrict === address[i].childs[j].childs[p].name) {
+                  console.log(address[i].childs[j].childs[p].code);
+                  for (
+                    let q = 0;
+                    q < address[i].childs[j].childs[p].childs.length;
+                    q++
+                  ) {
+                    if (
+                      searchTownship ===
+                      address[i].childs[j].childs[p].childs[q].name
+                    ) {
+                      this.addressCode =
+                        address[i].childs[j].childs[p].childs[q].code;
+                      console.log(this.addressCode);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
+    },
+
+    submit() {
+      let senderInfo = {
+        addCode: this.addressCode,
+        add: this.detailedAddress,
+        addCenter: [this.senderAddLng, this.senderAddLat],
+        addDetailedInfo: this.detailedAddressInfo,
+        name: this.userInputName,
+        phone: this.userInputPhone
+      };
+      console.log(senderInfo);
+      localStorage.setItem("senderInfo", JSON.stringify(senderInfo));
+      this.toPath({
+        path: "/index/delivery",
+        query: senderInfo
+      });
     }
   },
+
   watch: {
     search_key(newv, oldv) {
       if (newv == "") {
@@ -492,10 +577,9 @@ export default {
       }
     },
     detailedAddress() {
-      console.log(this.detailedAddress);
       if (this.detailedAddress) {
         this.mapCenterNoteBoxBool = true;
-        console.log(this.$refs);
+        console.log(this.detailedAddress);
       } else {
         this.mapCenterNoteBoxBool = false;
       }
@@ -538,7 +622,6 @@ export default {
             for (let key in self.__VUE_HOT_MAP__) {
               if (key === "3aeba454") {
                 let loadmapComponent = self.__VUE_HOT_MAP__[key].instances[0];
-                console.log(loadmapComponent.adMap);
                 loadmapComponent.center = [
                   result.geocodes[0].location.lng,
                   result.geocodes[0].location.lat
@@ -557,7 +640,7 @@ export default {
 <style lang="scss">
 .mymap {
   width: 100%;
-  height: r(1334);
+  height: r(1000);
   position: absolute;
   left: 0;
   top: 0;
@@ -628,32 +711,33 @@ export default {
           background-size: r(22) r(34);
           margin: r(17) 0 r(17) r(15);
           vertical-align: middle;
+          margin-right: r(15);
         }
         .bigCity {
           font-size: r(28);
           font-family: PingFang SC;
           color: #333;
-          margin-left: r(15);
-          line-height: r(68);
-        }
-        .popup {
-          display: inline-block;
-          width: 0;
-          height: 0;
-          border: r(8) solid;
-          border-color: #666 transparent transparent transparent;
+          // line-height: r(68);
           vertical-align: middle;
-          margin-left: r(10);
         }
-        .popdown {
-          display: inline-block;
-          width: 0;
-          height: 0;
-          border: r(8) solid;
-          border-color: transparent transparent #666 transparent;
-          vertical-align: middle;
-          margin-left: r(10);
-        }
+        // .popup {
+        //   display: inline-block;
+        //   width: 0;
+        //   height: 0;
+        //   border: r(8) solid;
+        //   border-color: #666 transparent transparent transparent;
+        //   vertical-align: middle;
+        //   margin-left: r(10);
+        // }
+        // .popdown {
+        //   display: inline-block;
+        //   width: 0;
+        //   height: 0;
+        //   border: r(8) solid;
+        //   border-color: transparent transparent #666 transparent;
+        //   vertical-align: middle;
+        //   margin-left: r(10);
+        // }
       }
     }
   }
@@ -668,7 +752,7 @@ export default {
       position: absolute;
       left: 0;
       right: 0;
-      top: 0;
+      top: r(300);
       bottom: r(31);
       margin: auto;
       width: r(45);
@@ -682,13 +766,12 @@ export default {
       position: fixed;
       left: 0;
       right: 0;
-      top: 0;
+      top: r(-20);
       bottom: r(250);
-      z-index: 100;
+      // z-index: -1;
       margin: auto;
       width: 100%;
       height: r(80);
-      background: red;
       display: flex;
       .addnote {
         height: r(80);
@@ -710,7 +793,7 @@ export default {
       .direct {
         position: fixed;
         left: 48.8%;
-        top: r(572);
+        top: r(562);
         z-index: 10;
         width: r(20);
         height: r(20);
@@ -719,6 +802,70 @@ export default {
         transform: rotate(45deg);
         background: #fff;
         // box-shadow: 0 0 r(20) rgba(0, 0, 0, 0.16);
+      }
+    }
+    .bignotebox {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: r(-30);
+      bottom: r(250);
+      z-index: 100;
+      margin: auto;
+      width: 100%;
+      height: r(100);
+      display: flex;
+      // background: red;
+      .addnote {
+        width: r(300);
+        height: r(100);
+        // border: 1px solid;
+        border-radius: r(14);
+        text-align: center;
+        margin: auto;
+        background: #fff;
+        display: flex;
+        padding: 0 r(20);
+        box-shadow: 0px 0px r(20) rgba(0, 0, 0, 0.16);
+        overflow: hidden;
+        span {
+          margin: auto;
+          color: #333;
+          font-size: r(26);
+          word-wrap: break-word;
+        }
+      }
+      .bigaddnote {
+        width: r(300);
+        height: r(100);
+        // border: 1px solid;
+        border-radius: r(14);
+        text-align: center;
+        margin: auto;
+        background: #fff;
+        display: flex;
+        padding: 0 r(20);
+        box-shadow: 0px 0px r(20) rgba(0, 0, 0, 0.16);
+        overflow: auto;
+        span {
+          margin: auto;
+          color: #333;
+          font-size: r(22);
+          word-wrap: break-word;
+        }
+      }
+      .direct {
+        position: fixed;
+        left: 48.8%;
+        top: r(570);
+        z-index: -1;
+        width: r(20);
+        height: r(20);
+        // border-bottom: 1px solid;
+        // border-right: 1px solid;
+        transform: rotate(45deg);
+        background: #fff;
+        box-shadow: 0 0 r(20) rgba(0, 0, 0, 0.16);
       }
     }
   }
@@ -933,6 +1080,31 @@ export default {
     }
   }
 
+  // 回当前位置图标
+  .goback {
+    position: fixed;
+    left: 0;
+    right: r(-588);
+    top: 0;
+    bottom: r(-333);
+    margin: auto;
+    width: r(96);
+    height: r(96);
+    background: #fff;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    display: flex;
+    span {
+      margin: auto;
+      display: inline-block;
+      width: r(50);
+      height: r(50);
+      background: url(../assets/img/gobackicon.png) no-repeat;
+      background-size: r(50) r(50);
+      opacity: 0.7;
+    }
+  }
+
   // 信息表单层
   .senderInfo {
     width: r(690);
@@ -990,6 +1162,7 @@ export default {
         width: r(600);
         height: r(84);
         vertical-align: middle;
+        overflow: hidden;
       }
     }
     .floor-n3 {

@@ -12,7 +12,7 @@
       <div class="searcharea">
         <div class="searchbox">
           <span class="searchicon"></span>
-          <input type="text" placeholder="输入城市名" />
+          <input type="text" placeholder="输入城市名" v-model="search_key" />
         </div>
       </div>
       <!-- 地址区 -->
@@ -25,7 +25,7 @@
               :key="index"
               :class="provinceNum === index ? 'selectedprovince' : 'otherprovince'"
               @click="selectProvince(item,index)"
-            >{{item}}</li>
+            >{{item.replace(/[\d]*/ig, "")}}</li>
           </ul>
         </div>
         <!-- 市 -->
@@ -36,7 +36,7 @@
               :key="index"
               :class="cityNum === index ? 'selectedcity' : 'othercity'"
               @click="selectCity(item,index)"
-            >{{item}}</li>
+            >{{item.replace(/[\d]*/ig, "")}}</li>
           </ul>
         </div>
         <!-- 区 -->
@@ -47,17 +47,23 @@
               :key="index"
               :class="districtNum === index ? 'selecteddistrict' : 'otherdistrict'"
               @click="selectDistrict(item,index)"
-            >{{item}}</li>
+            >{{item.replace(/[\d]*/ig, "")}}</li>
           </ul>
         </div>
       </div>
     </div>
+
+    <!-- 街道弹出区 -->
+    <mt-popup v-model="popupVisible" position="bottom">...</mt-popup>
   </div>
 </template>
 
 <script>
-// import Vue from "vue";
+import Vue from "vue";
+import { Popup } from "mint-ui";
+Vue.component(Popup.name, Popup);
 import address from "./address.json";
+console.log(address);
 import { Toast } from "mint-ui";
 // Vue.use(Toast);
 
@@ -74,12 +80,14 @@ export default {
       userSelectedProvince: "",
       userSelectedCity: "",
       userSelectedDistrict: "",
-      toastInstanse: null
+      toastInstanse: null,
+      search_key: "",
+      popupVisible: false
     };
   },
   mounted() {
     for (let i = 0; i < address.length; i++) {
-      this.provinceList.push(address[i].name);
+      this.provinceList.push(address[i].name + address[i].code);
     }
   },
   methods: {
@@ -133,11 +141,22 @@ export default {
         this.userSelectedCity &&
         this.userSelectedDistrict
       ) {
+        console.log(
+          this.$parent.$el.firstChild.lastChild.lastChild.children[1]
+        );
+        console.log(this);
         this.$parent.$el.firstChild.lastChild.lastChild.children[1].innerText = this.userSelectedDistrict;
         this.cityPickerBool = false;
         this.$parent.userSelectedProvince = this.userSelectedProvince;
         this.$parent.userSelectedCity = this.userSelectedCity;
         this.$parent.userSelectedDistrict = this.userSelectedDistrict;
+        setTimeout(() => {
+          this.$parent.detailedAddress =
+            this.userSelectedProvince.replace(/[\d]*/gi, "") +
+            this.userSelectedCity.replace(/[\d]*/gi, "") +
+            this.userSelectedDistrict.replace(/[\d]*/gi, "") +
+            this.$parent.mapShowDetailedAddress;
+        }, 800);
       }
     },
     selectProvince(item, index) {
@@ -148,10 +167,12 @@ export default {
       this.provinceNum = index;
       this.userSelectedProvince = item;
       for (let i = 0; i < address.length; i++) {
-        if (item === address[i].name) {
+        if (item.replace(/[\d]*/gi, "") === address[i].name) {
           this.cityList = [];
           for (let j = 0; j < address[i].childs.length; j++) {
-            this.cityList.push(address[i].childs[j].name);
+            this.cityList.push(
+              address[i].childs[j].name + address[i].childs[j].code
+            );
           }
         }
       }
@@ -161,11 +182,14 @@ export default {
       this.userSelectedCity = item;
       for (let i = 0; i < address.length; i++) {
         for (let j = 0; j < address[i].childs.length; j++) {
-          if (item === address[i].childs[j].name) {
+          if (item.replace(/[\d]*/gi, "") === address[i].childs[j].name) {
             this.districtList = [];
             this.userSelectedCity = item;
             for (let k = 0; k < address[i].childs[j].childs.length; k++) {
-              this.districtList.push(address[i].childs[j].childs[k].name);
+              this.districtList.push(
+                address[i].childs[j].childs[k].name +
+                  address[i].childs[j].childs[k].code
+              );
             }
           }
         }
@@ -174,6 +198,18 @@ export default {
     selectDistrict(item, index) {
       this.districtNum = index;
       this.userSelectedDistrict = item;
+    }
+  },
+
+  watch: {
+    search_key() {
+      for (let i = 0; i < this.provinceList.length; i++) {
+        if (this.provinceList[i].indexOf(this.search_key) !== -1) {
+          let item = this.provinceList[i];
+          let index = i;
+          this.selectProvince(item, index);
+        }
+      }
     }
   }
 };

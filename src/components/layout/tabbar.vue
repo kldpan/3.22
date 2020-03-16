@@ -4,11 +4,16 @@
       <img slot="icon" :src="`${item.ImgUrl}${num === index ? '2.png' : '1.png'}`">
     </div>-->
 
-    <div v-model="selected" class="btm_nav">
+    <!-- 后端传回icon -->
+    <div class="btm_nav">
       <div v-for="(item,index) in pathList" :key="index" class="nav" @click="selectIcon(index)">
         <div :class="btmIcon_classname[index]">
-          <img slot="icon" :src="`${num === index ? item.selectedImgUrl : item.ImgUrl}`" />
-          <span :class="`${num === index ? 'selectedname' : 'name'}`">{{item.name}}</span>
+          <div class="up">
+            <img slot="icon" :src="`${num === index ? item.selectedImgUrl : item.ImgUrl}`" />
+          </div>
+          <div class="down">
+            <span :class="`${num === index ? 'selectedname' : 'name'}`">{{item.name}}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -20,34 +25,25 @@ export default {
   data() {
     return {
       pathList: [
-        // { pathname: "index", path: "/index", ImgUrl:"https://res.bestcake.com/m-images/ww/foot/foot-menu-a-", name: "发货"},
-        // { pathname: "order", path: "/order", ImgUrl:"https://res.bestcake.com/m-images/ww/foot/foot-menu-c-", name: "订单"},
-        // { pathname: "mine", path: "/mine", ImgUrl:"https://res.bestcake.com/m-images/ww/foot/foot-menu-d-", name: "我的"},
         {
           pathname: "index",
           path: "/index/delivery",
-          ImgUrl:
-            "http://m.qpic.cn/psc?/V14WvDya21PaU3/hsnfJ.a5yg7.BhItQyNwPaq.5X7yC68rUvm6Suhh5Y9fCimMi175TNasOpdHH7V.uncE1vSNYNMd2Jy0KMA*WduwDgwvKMxeg5R5F96kTfk!/b&bo=MAAmAAAAAAADBzQ!&rf=viewer_4",
-          selectedImgUrl:
-            "http://m.qpic.cn/psc?/V14WvDya21PaU3/hsnfJ.a5yg7.BhItQyNwPStPnzOd5ydk.CUsVDLRnP6Odk.FCvjHY85L3E1bfnt7hTnuCGg*NjUROvVc3VlfQvwlEB1xPKJ2LmhLw7mQVZ4!/b&bo=LgAlAAAAAAADFzk!&rf=viewer_4",
+          ImgUrl: "delivery.png",
+          selectedImgUrl: "delivery-selected.png",
           name: "发货"
         },
         {
-          pathname: "citypicker",
-          path: "/citypicker",
-          ImgUrl:
-            "http://m.qpic.cn/psc?/V14WvDya21PaU3/hsnfJ.a5yg7.BhItQyNwPdEWeLKwuX4D6tfrAzbdXBRd1ZUOC77l2tjV1WGtwbOfltLhfDWOLBGnfguY8gG2AjC64Tt1G4OSGByoG9aWDgE!/b&bo=LAAwAAAAAAADFy4!&rf=viewer_4",
-          selectedImgUrl:
-            "http://m.qpic.cn/psc?/V14WvDya21PaU3/hsnfJ.a5yg7.BhItQyNwPdyTLPS*lZ5NEoewZDL3mTtmrKRc.MKXVlHoBIVCkChNh9CwHQNV9c1HtHUIkBlY73wepYvkP*cN5*iy6aw9aYA!/b&bo=KgAuAAAAAAADFzY!&rf=viewer_4",
+          pathname: "order",
+          path: "/order",
+          ImgUrl: "order.png",
+          selectedImgUrl: "order-selected.png",
           name: "订单"
         },
         {
           pathname: "logout",
           path: "/logout",
-          ImgUrl:
-            "http://m.qpic.cn/psc?/V14WvDya21PaU3/hsnfJ.a5yg7.BhItQyNwPRaPUPbZXUJo*XVO6O3FXalwgHTPcqIDGclchjlg8r1Mp2Cxto*cWMr1tuN0pwsp0Cjx*NxPLLG4TFktHzEVHiU!/b&bo=KwAwAAAAAAADFyk!&rf=viewer_4",
-          selectedImgUrl:
-            "http://m.qpic.cn/psc?/V14WvDya21PaU3/hsnfJ.a5yg7.BhItQyNwPa2*BHDEUt47fqzO*rg0xALrk9cgKj3UpmMkUWs.6KUKNsSJQg0bEc54jp4S1BXls68.cHcvJeLIMNyuK*1UBQ8!/b&bo=KQAuAAAAAAADFzU!&rf=viewer_4",
+          ImgUrl: "mine.png",
+          selectedImgUrl: "mine-selected.png",
           name: "我的"
         }
       ],
@@ -62,6 +58,9 @@ export default {
       this.num = index;
       // 并在点击时跳转到各自的页面
       this.$router.push(this.pathList[index].path);
+    },
+    toDelivery() {
+      this.testSrc = this.pathList[0].selectedImgUrl;
     }
   },
   mounted() {
