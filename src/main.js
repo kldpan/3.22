@@ -3,7 +3,8 @@ import AMap from 'vue-amap'
 import VueTouch from 'vue-touch'
 
 import App from './App.vue'
-import router from './router'
+import router from './router/index.js'
+import './router/routeguard.js'
 
 // 要么在全局注册组件，组件中直接调用，要么在组件中引入并调用
 // import { MessageBox } from "mint-ui";
@@ -22,21 +23,25 @@ import vueWechatTitle from "vue-wechat-title"
 import coreConfig from "@/core/core.config.js"
 
 import 'iview/dist/styles/iview.css'
-import {Upload} from 'iview';
+import {
+  Upload
+} from 'iview';
 Vue.component('Upload', Upload);
 
 Vue.use(vueWechatTitle);
-Vue.use(coreConfig);//fn(){}
+Vue.use(coreConfig); //fn(){}
 
 Vue.use(AMap);
 AMap.initAMapApiLoader({
-  key:'b04b292ba4b2140151e9c2bcd02bad0c',
-  plugin:['AMap.Geolocation', 'AMap.Autocomplete', 'AMap.PlaceSearch', 'AMap.Scale', 'AMap.OverView', 'AMap.ToolBar', 'AMap.MapType', 'AMap.PolyEditor', 'AMap.CircleEditor', 'AMap.CitySearch']
+  key: 'b04b292ba4b2140151e9c2bcd02bad0c',
+  plugin: ['AMap.Geolocation', 'AMap.Autocomplete', 'AMap.PlaceSearch', 'AMap.Scale', 'AMap.OverView', 'AMap.ToolBar', 'AMap.MapType', 'AMap.PolyEditor', 'AMap.CircleEditor', 'AMap.CitySearch']
 });
 
-Vue.use(VueTouch, {name:'v-touch'})
+Vue.use(VueTouch, {
+  name: 'v-touch'
+})
 VueTouch.config.swipe = {
-  threshold:100       //设置手指左右滑动距离
+  threshold: 100 //设置手指左右滑动距离
 }
 
 // Vue.use((Vue)=>{

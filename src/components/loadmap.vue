@@ -83,7 +83,7 @@
             </div>
             <div class="detailedaddress">{{autoAddressInfo.formattedAddress}}</div>
           </div>
-          <div v-else="autoAddressInfo" class="locating">正在定位</div>
+          <!-- <div v-else="autoAddressInfo" class="locating">正在定位</div> -->
         </li>
       </ul>
 
@@ -215,6 +215,7 @@ export default {
       senderAdd: "",
       senderAddLng: "",
       senderAddLat: "",
+      senderList: [],
 
       // 地图数据 ↓
       // center: [121.59996, 31.197646],
@@ -559,6 +560,7 @@ export default {
         name: this.userInputName,
         phone: this.userInputPhone
       };
+      // this.senderList.push(senderInfo);
       console.log(senderInfo);
       localStorage.setItem("senderInfo", JSON.stringify(senderInfo));
       this.toPath({
@@ -580,24 +582,17 @@ export default {
       if (this.detailedAddress) {
         this.mapCenterNoteBoxBool = true;
         console.log(this.detailedAddress);
+        this.getAddCode();
       } else {
         this.mapCenterNoteBoxBool = false;
       }
       // 通过获取该地址的经纬度然后编码成全地址
-      // this.senderAddLng =
-      //   this.userSearchAddressInfo.location.lng ||
-      //   this.userDragMapAddressInfo.poiList.pois[0].location.lng;
-      // this.senderAddLat =
-      //   this.userSearchAddressInfo.location.lat ||
-      //   this.userDragMapAddressInfo.poiList.pois[0].location.lat;
     },
     userInputName() {
       this.senderName = this.userInputName;
-      console.log(this.senderName);
     },
     userInputPhone() {
       this.senderPhone = this.userInputPhone;
-      console.log(this.senderPhone);
     },
     userSelectedDistrict() {
       let paramsAdd =

@@ -8,7 +8,12 @@
           <div class="sendIcon-n1">装</div>
         </div>
         <div class="send-n1-address fl">
-          <div class="send-n1-big-area" @click="toPath('/loadmap')">{{loadCityArea}}</div>
+          <div
+            class="send-n1-big-area"
+            @click="toPath('/loadmap')"
+            v-if="sendBackInfo.length === 0"
+          >{{test01}}</div>
+          <div class="send-n1-big-area" @click="toPath('/loadmap')" v-else>{{test02}}</div>
           <div class="send-n1-small-area">{{loadDetailAddress}}</div>
         </div>
         <div class="sendMore-n1 fr">
@@ -278,13 +283,17 @@ export default {
       testData: [],
       currentPosition: "",
       loadCityArea: "填写城市 / 区域",
-      loadDetailAddress: "点击输入详细地址"
+      loadDetailAddress: "点击输入详细地址",
+      sendBackInfo: [1],
+      test01: "test01",
+      test02: "test02"
     };
   },
   mounted() {
+    console.log(this.$route);
     // 进入首页从vuex中将location和address取出
     setTimeout(() => {
-      if (this.$store.state.location.status === 1) {
+      if (this.$store.state.address) {
         this.loadCityArea =
           this.$store.state.location.addressComponent.province +
           " / " +
@@ -297,10 +306,38 @@ export default {
       }
     }, 1000);
 
+    // loadmap页跳转回来首页
+    console.log(this.$route.query);
+    this.sendBackInfo = this.$route.query;
+
     // 后端测试数据
     // this.$apis.getTest01().then(res => {
     //   console.log(res);
     // });
+  },
+  watch: {},
+  beforeRouteUpdate(to, from, next) {
+    // if (to.path === "/") {
+    //   console.log(this.loadCityArea);
+    //   // setTimeout(() => {
+    //   //   if (this.$store.state.location.status === 1) {
+    //   //     this.loadCityArea =
+    //   //       this.$store.state.location.addressComponent.province +
+    //   //       " / " +
+    //   //       this.$store.state.location.addressComponent.city;
+    //   //     this.loadDetailAddress =
+    //   //       this.$store.state.location.addressComponent.district +
+    //   //       this.$store.state.location.addressComponent.township +
+    //   //       this.$store.state.location.addressComponent.street +
+    //   //       this.$store.state.location.addressComponent.streetNumber;
+    //   //   }
+    //   // }, 1000);
+    //   next();
+    // } else if (from.path === "/loadmap") {
+    //   console.log(this.loadCityArea);
+    //   this.loadCityArea = from.query.add;
+    //   next();
+    // }
   },
   methods: {
     changeLoadWay(item, index) {

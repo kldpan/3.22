@@ -1,20 +1,14 @@
 <template>
-  <div class="citypicker" v-if="cityPickerBool">
+  <div class="timepicker" v-if="timePickerBool">
     <div class="closearea" @click="closeModal()"></div>
     <div class="selectarea">
       <!-- 顶部 -->
       <div class="titlearea clearfix">
         <div class="cancel fl" @click="closeModal()">取消</div>
-        <div class="titlename fl">选择装货地</div>
+        <div class="titlename fl">装货时间</div>
         <div class="sub fr" @click="completeSelect()">完成</div>
       </div>
-      <!-- 搜索区 -->
-      <div class="searcharea">
-        <div class="searchbox">
-          <span class="searchicon"></span>
-          <input type="text" placeholder="输入城市名" v-model="search_key" />
-        </div>
-      </div>
+
       <!-- 地址区 -->
       <div class="addressarea clearfix">
         <!-- 省 -->
@@ -24,7 +18,6 @@
               v-for="(item,index) in provinceList"
               :key="index"
               :class="provinceNum === index ? 'selectedprovince' : 'otherprovince'"
-              @click="selectProvince(item,index)"
             >{{item.replace(/[\d]*/ig, "")}}</li>
           </ul>
         </div>
@@ -35,7 +28,6 @@
               v-for="(item,index) in cityList"
               :key="index"
               :class="cityNum === index ? 'selectedcity' : 'othercity'"
-              @click="selectCity(item,index)"
             >{{item.replace(/[\d]*/ig, "")}}</li>
           </ul>
         </div>
@@ -46,7 +38,6 @@
               v-for="(item,index) in districtList"
               :key="index"
               :class="districtNum === index ? 'selecteddistrict' : 'otherdistrict'"
-              @click="selectDistrict(item,index)"
             >{{item.replace(/[\d]*/ig, "")}}</li>
           </ul>
         </div>
@@ -54,23 +45,18 @@
     </div>
 
     <!-- 街道弹出区 -->
-    <mt-popup v-model="popupVisible" position="bottom">...</mt-popup>
+    <!-- <mt-popup v-model="popupVisible" position="bottom">...</mt-popup> -->
   </div>
 </template>
 
 <script>
-import Vue from "vue";
-import { Popup } from "mint-ui";
-Vue.component(Popup.name, Popup);
-import address from "./address.json";
-console.log(address);
 import { Toast } from "mint-ui";
 // Vue.use(Toast);
 
 export default {
   data() {
     return {
-      cityPickerBool: false,
+      timePickerBool: false,
       provinceNum: -1,
       cityNum: -1,
       districtNum: -1,
@@ -85,134 +71,16 @@ export default {
       popupVisible: false
     };
   },
-  mounted() {
-    for (let i = 0; i < address.length; i++) {
-      this.provinceList.push(address[i].name + address[i].code);
-    }
-  },
+  mounted() {},
   methods: {
-    closeModal() {
-      this.userSelectedProvince = "";
-      this.userSelectedCity = "";
-      this.userSelectedDistrict = "";
-      this.cityList = [];
-      this.districtList = [];
-      this.provinceNum = -1;
-      this.cityPickerBool = false;
-    },
-    completeSelect() {
-      // 若打开后未选择省份，提示选择省份
-      if (!this.userSelectedProvince) {
-        this.toastInstanse = Toast({
-          message: "请选择省份",
-          position: "middle",
-          duration: 1000
-        });
-        this.toastInstanse.$el.style.zIndex = 100000;
-      }
-
-      // 若未选择城市，则提示选择城市
-      if (this.userSelectedProvince && !this.userSelectedCity) {
-        this.toastInstanse = Toast({
-          message: "请选择城市",
-          position: "middle",
-          duration: 1000
-        });
-        this.toastInstanse.$el.style.zIndex = 100000;
-      }
-
-      // 若未选择区域，则提示选择区域
-      if (
-        this.userSelectedProvince &&
-        this.userSelectedCity &&
-        !this.userSelectedDistrict
-      ) {
-        this.toastInstanse = Toast({
-          message: "请选择区域",
-          position: "middle",
-          duration: 1000
-        });
-        this.toastInstanse.$el.style.zIndex = 100000;
-      }
-
-      // 若全部选择完毕，关闭模态
-      if (
-        this.userSelectedProvince &&
-        this.userSelectedCity &&
-        this.userSelectedDistrict
-      ) {
-        this.$parent.district = this.userSelectedDistrict;
-        this.cityPickerBool = false;
-        this.$parent.userSelectedProvince = this.userSelectedProvince;
-        this.$parent.userSelectedCity = this.userSelectedCity;
-        this.$parent.userSelectedDistrict = this.userSelectedDistrict;
-        setTimeout(() => {
-          this.$parent.detailedAddress =
-            this.userSelectedProvince.replace(/[\d]*/gi, "") +
-            this.userSelectedCity.replace(/[\d]*/gi, "") +
-            this.userSelectedDistrict.replace(/[\d]*/gi, "") +
-            this.$parent.mapShowDetailedAddress;
-        }, 800);
-      }
-    },
-    selectProvince(item, index) {
-      this.cityList = [];
-      this.cityNum = -1;
-      this.districtList = [];
-      this.districtNum = -1;
-      this.provinceNum = index;
-      this.userSelectedProvince = item;
-      for (let i = 0; i < address.length; i++) {
-        if (item.replace(/[\d]*/gi, "") === address[i].name) {
-          this.cityList = [];
-          for (let j = 0; j < address[i].childs.length; j++) {
-            this.cityList.push(
-              address[i].childs[j].name + address[i].childs[j].code
-            );
-          }
-        }
-      }
-    },
-    selectCity(item, index) {
-      this.cityNum = index;
-      this.userSelectedCity = item;
-      for (let i = 0; i < address.length; i++) {
-        for (let j = 0; j < address[i].childs.length; j++) {
-          if (item.replace(/[\d]*/gi, "") === address[i].childs[j].name) {
-            this.districtList = [];
-            this.userSelectedCity = item;
-            for (let k = 0; k < address[i].childs[j].childs.length; k++) {
-              this.districtList.push(
-                address[i].childs[j].childs[k].name +
-                  address[i].childs[j].childs[k].code
-              );
-            }
-          }
-        }
-      }
-    },
-    selectDistrict(item, index) {
-      this.districtNum = index;
-      this.userSelectedDistrict = item;
-    }
-  },
-
-  watch: {
-    search_key() {
-      for (let i = 0; i < this.provinceList.length; i++) {
-        if (this.provinceList[i].indexOf(this.search_key) !== -1) {
-          let item = this.provinceList[i];
-          let index = i;
-          this.selectProvince(item, index);
-        }
-      }
-    }
+    closeModal() {},
+    completeSelect() {}
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.citypicker {
+.timepicker {
   width: 100%;
   height: r(1334);
   background: rgba(0, 0, 0, 0.3);
@@ -371,9 +239,5 @@ export default {
       }
     }
   }
-}
-.mytoast {
-  // background: red;
-  z-index: 100000 !important;
 }
 </style>
