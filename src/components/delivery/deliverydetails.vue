@@ -117,16 +117,18 @@
         <div class="carlength">
           <div class="floor-n1">
             <span class="length">车长</span>
-            <span class="notice">(必填，最多填3项)</span>
+            <span class="notice">(必填)</span>
           </div>
           <div class="floor-n2" ref="userCarLength">
             <ul>
               <li
                 v-for="(item,index) in carLength"
                 :key="index"
-                :class="item.bool === true ? 'selected-carlength fl' : 'noselected-carlength fl'"
+                :class="carLengthNum === index ? 'selected-carlength fl' : 'noselected-carlength fl'"
                 @click.stop="selectCarLength(item,index)"
-              >{{item.carLength}}</li>
+              >
+                <span>{{item}}</span>
+              </li>
             </ul>
           </div>
         </div>
@@ -134,7 +136,7 @@
         <div class="cartype">
           <div class="floor-n1">
             <span class="type">车型</span>
-            <span class="notice">(必填，最多填3项)</span>
+            <span class="notice">(非必填)</span>
           </div>
           <div class="floor-n2" ref="userCarType">
             <ul>
@@ -143,9 +145,16 @@
                 :key="index"
                 :class="carTypeNum === index ? 'selected-cartype fl' : 'noselected-cartype fl'"
                 @click.stop="selectCarType(item,index)"
-              >{{item}}</li>
+              >
+                <span>{{item}}</span>
+              </li>
             </ul>
           </div>
+        </div>
+        <!-- 第四层 -->
+        <div class="foot">
+          <span class="name">预估价：</span>
+          <span class="showprice">{{'0'}}</span>
         </div>
       </div>
     </div>
@@ -261,36 +270,12 @@ export default {
       userGoodName: "",
       price: 0,
       carTypeModalBool: false,
-      carLength: [
-        { carLength: 8.7, bool: true },
-        { carLength: 9.6, bool: false },
-        { carLength: 11.7, bool: false },
-        { carLength: 12.5, bool: false },
-        { carLength: 13, bool: false },
-        { carLength: 13.7, bool: false },
-        { carLength: 15, bool: false },
-        { carLength: 16, bool: false },
-        { carLength: 17.5, bool: false },
-        { carLength: 20, bool: false }
-      ],
-      carTypeList: [
-        "平板",
-        "高栏",
-        "厢式",
-        "集装箱",
-        "自卸",
-        "冷藏",
-        "保温",
-        "高低板",
-        "面包车",
-        "棉被车",
-        "爬梯车",
-        "飞翼车"
-      ],
-      carLengthNum: 0,
+      carLength: [17.5, 13, 9.6, 7.6, 6.8],
+      carTypeList: ["平板", "高栏", "厢式", "集装箱", "高低板"],
+      carLengthNum: 1,
       carTypeNum: 0,
-      userCarLength: [],
-      userCarType: [],
+      userSelectedCarLength: "13",
+      userSelectedCarType: "平板",
       payWayModalBool: false,
       payWay: "",
       userSelectTime: "",
@@ -304,10 +289,7 @@ export default {
       selectWhichPriceChecked: true,
 
       //   时间选择器相关
-      birthday: "", //出生日期
-      startDate: new Date("1968-01-01"),
-      pickerValue: "",
-      distance: 0
+      userSelectedTime: ""
     };
   },
   components: {
@@ -349,39 +331,27 @@ export default {
     },
     closeCarTypeModal() {
       this.carTypeModalBool = false;
-      this.userCarLength = [];
-      this.userCarType = [];
-      console.log(this.userCarLength);
+      this.carLengthNum = 1;
+      this.carTypeNum = 0;
+      this.userSelectedCarLength = "17.5";
+      this.userSelectedCarType = "平板";
+      console.log(this.userSelectedCarLength, this.userSelectedCarType);
     },
     inputPriceModalShow() {
       this.inputPriceModalBool = true;
     },
     selectCarLength(item, index) {
-      item.bool = !item.bool;
-      if (item.bool) {
-        this.userCarLength.push(item);
-      } else {
-        this.userCarLength.splice(this.userCarLength.indexOf(item), 1);
-      }
-      if (this.userCarLength > 3) {
-        for (let i = 0; i < this.userCarLength.length; i++) {
-          if (index !== i) {
-            this.userCarLength[i].bool = false;
-          }
-        }
-      }
-      console.log(this.userCarLength);
-      // if(this.userCarLength.length > 3){
-      //   item.bool = !item.bool;
-
-      // }
+      this.carLengthNum = index;
+      this.userSelectedCarLength = item;
+      // 发接口
     },
     selectCarType(item, index) {
       this.carTypeNum = index;
-      this.userCarType.push(item);
+      this.userSelectedCarType = item;
     },
     complete() {
       this.carTypeModalBool = false;
+      console.log(this.userSelectedCarLength, this.userSelectedCarType);
     },
     payWayModalShow() {
       this.payWayModalBool = true;
@@ -477,10 +447,11 @@ export default {
       //   console.log(this.distance);
 
       // 调用货车路线规划测距
-      AMap.plugin("AMap.TruckDriving", function() {
+      AMap.plugin("AMap.Driving", function() {
         var driving = new AMap.Driving({
-          // 驾车路线规划策略，AMap.DrivingPolicy.LEAST_TIME是最快捷模式
+          // 驾车路线规划策略，AMap.DrivingPolicy.LEAST_TIME是最快捷模式;  LEAST_FEE是最经济模式;  LEAST_DISTANCE是最短距离模式;   REAL_TRAFFIC是考虑实时路况模式
           policy: AMap.DrivingPolicy.REAL_TRAFFIC
+          //
         });
 
         var startLngLat = sendCenter;
@@ -489,7 +460,6 @@ export default {
         driving.search(startLngLat, endLngLat, function(status, result) {
           // 未出错时，result即是对应的路线规划方案
           console.log(result.routes[0].distance);
-          console.log(self);
           for (let key in self.__VUE_HOT_MAP__) {
             if (key === "6fb47643") {
               let loadmapComponent = self.__VUE_HOT_MAP__[key].instances[0];
@@ -1063,7 +1033,7 @@ export default {
     }
     .cartypearea {
       width: r(750);
-      height: r(614);
+      height: r(479);
       position: fixed;
       bottom: 0;
       z-index: 1000000;
@@ -1088,7 +1058,7 @@ export default {
         .titlename {
           font-size: r(32);
           font-family: PingFang SC;
-          font-weight: 900;
+          font-weight: 500;
           line-height: r(88);
           color: #333;
           margin-left: r(227);
@@ -1106,13 +1076,13 @@ export default {
       // 第二层
       .carlength {
         width: r(710);
-        height: r(222);
+        height: r(130);
         margin: 0 auto;
         overflow: hidden;
-        border-bottom: 1px solid rgba(198, 198, 198, 0.3);
+        // border-bottom: 1px solid rgba(198, 198, 198, 0.3);
         .floor-n1 {
           width: 100%;
-          height: r(42);
+          height: r(40);
           margin-top: r(20);
           line-height: r(42);
           .length {
@@ -1120,7 +1090,6 @@ export default {
             font-family: PingFang SC;
             font-weight: 500;
             color: #333;
-            font-weight: 900;
           }
           .notice {
             font-size: r(30);
@@ -1132,35 +1101,33 @@ export default {
         }
         .floor-n2 {
           width: r(710);
-          height: r(160);
+          height: r(70);
           ul {
             width: r(710);
-            height: r(160);
+            height: r(70);
             display: flex;
-            flex-wrap: wrap;
-            .selected-carlength {
+            justify-content: space-around;
+            align-items: center;
+            li {
               width: r(126);
               height: r(50);
-              border: 1px solid #0350a0;
               border-radius: r(28);
               text-align: center;
               line-height: r(50);
               font-size: r(26);
+              display: flex;
+              span {
+                margin: auto;
+              }
+            }
+            .selected-carlength {
+              border: 1px solid #0350a0;
               color: #0350a0;
-              margin: r(15) r(15) 0 0;
-              box-sizing: border-box;
+              background: #fff;
             }
             .noselected-carlength {
-              width: r(126);
-              height: r(50);
-              border-radius: r(28);
-              text-align: center;
-              line-height: r(50);
-              font-size: r(26);
               color: #666;
               background: #f7f7f7;
-              margin: r(15) r(15) 0 0;
-              box-sizing: border-box;
             }
           }
         }
@@ -1168,20 +1135,20 @@ export default {
       // 第三层
       .cartype {
         width: r(710);
-        height: r(300);
+        height: r(130);
         margin: 0 auto;
         overflow: hidden;
+        // border-bottom: 1px solid red;
         .floor-n1 {
           width: 100%;
-          height: r(42);
+          height: r(40);
           margin-top: r(20);
-          line-height: r(42);
+          line-height: r(40);
           .type {
             font-size: r(30);
             font-family: PingFang SC;
             font-weight: 500;
             color: #333;
-            font-weight: 900;
           }
           .notice {
             font-size: r(30);
@@ -1193,38 +1160,61 @@ export default {
         }
         .floor-n2 {
           width: r(710);
-          height: r(240);
-          border-bottom: 1px solid rgba(198, 198, 198, 0.3);
+          height: r(70);
           ul {
             width: r(710);
-            height: r(240);
+            height: r(70);
             display: flex;
-            flex-wrap: wrap;
-            .selected-cartype {
+            justify-content: space-around;
+            align-items: center;
+            li {
               width: r(126);
               height: r(50);
-              border: 1px solid #0350a0;
               border-radius: r(28);
               text-align: center;
               line-height: r(50);
               font-size: r(26);
+              display: flex;
+              span {
+                margin: auto;
+              }
+            }
+            .selected-cartype {
+              border: 1px solid #0350a0;
               color: #0350a0;
-              margin: r(16) r(16) 0 0;
-              box-sizing: border-box;
+              background: #fff;
             }
             .noselected-cartype {
-              width: r(126);
-              height: r(50);
-              border-radius: r(28);
-              text-align: center;
-              line-height: r(50);
-              font-size: r(26);
               color: #666;
               background: #f7f7f7;
-              margin: r(15) r(15) 0 0;
-              box-sizing: border-box;
             }
           }
+        }
+      }
+
+      // 价格显示层
+      .foot {
+        width: r(710);
+        height: r(130);
+        margin: 0 auto;
+        .name {
+          display: inline-block;
+          width: 50%;
+          height: r(130);
+          font-size: r(26);
+          color: #999;
+          line-height: r(130);
+          text-align: right;
+        }
+        .showprice {
+          display: inline-block;
+          width: 50%;
+          height: r(130);
+          font-size: r(32);
+          color: #f28312;
+          line-height: r(130);
+          text-align: left;
+          font-weight: 600;
         }
       }
     }
