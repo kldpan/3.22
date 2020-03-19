@@ -552,6 +552,51 @@ export default {
       }
     },
 
+    getDistance() {
+      let sendInfo = JSON.parse(localStorage.getItem("senderInfo"));
+      //   console.log(sendInfo);
+      let recieveInfo = JSON.parse(localStorage.getItem("recieveInfo"));
+      //   console.log(recieveInfo);
+      let sendCenter = sendInfo.addCenter;
+      let recieveCenter = recieveInfo.addCenter;
+      //   直接坐标测距
+      //   let basicDistance = AMap.GeometryUtil.distance(sendCenter, recieveCenter);
+      //   console.log(basicDistance);
+      //   this.distance = parseInt(basicDistance / 1000);
+      //   console.log(this.distance);
+
+      // 调用货车路线规划测距
+      AMap.plugin("AMap.Driving", function() {
+        var driving = new AMap.Driving({
+          // 驾车路线规划策略，AMap.DrivingPolicy.LEAST_TIME是最快捷模式;  LEAST_FEE是最经济模式;  LEAST_DISTANCE是最短距离模式;   REAL_TRAFFIC是考虑实时路况模式
+          policy: AMap.DrivingPolicy.REAL_TRAFFIC
+          //
+        });
+
+        var startLngLat = sendCenter;
+        var endLngLat = recieveCenter;
+
+        driving.search(startLngLat, endLngLat, function(status, result) {
+          // 未出错时，result即是对应的路线规划方案
+          // 将该result数据存入localStorage中
+          localStorage.setItem("distanceInfo", JSON.stringify(result));
+          console.log(result.routes[0].distance);
+          for (let key in self.__VUE_HOT_MAP__) {
+            if (key === "6fb47643") {
+              let loadmapComponent = self.__VUE_HOT_MAP__[key].instances[0];
+              loadmapComponent.distance = Math.round(
+                result.routes[0].distance / 1000
+              );
+              // 并将其存入vuex中
+              loadmapComponent.$store.dispatch("setDistanceInfo",result);
+              loadmapComponent.$store.dispatch("setDistance",Math.round(result.routes[0].distance / 1000));
+              console.log(loadmapComponent.distance);
+            }
+          }
+        });
+      });
+    },
+
     submit() {
       let recieveInfo = {
         addCode: this.addressCode,
@@ -567,6 +612,7 @@ export default {
         path: "/deliverydetails",
         query: recieveInfo
       });
+      this.getDistance();
     }
   },
 

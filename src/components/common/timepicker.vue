@@ -39,9 +39,9 @@
 </template>
 
 <script>
-import { Toast } from "mint-ui";
-// Vue.use(Toast);
-
+import dayjs from "dayjs";
+let date = new Date();
+console.log(date.getFullYear());
 export default {
   data() {
     return {
@@ -49,10 +49,7 @@ export default {
       toastInstanse: null,
       dateNum: 0,
       timeNum: 0,
-      userSelectedDate: "今天",
-      userSelectedTime: "全天都可以",
       dateList: ["今天", "明天"],
-      periodList: ["全天", "上午", "下午", "晚上"],
       timeList: [
         "全天都可以",
         "上午都可以",
@@ -83,7 +80,11 @@ export default {
         "晚上(22：00-23:00)",
         "晚上(23：00-00:00)",
         ""
-      ]
+      ],
+      userSelectedDate: "今天",
+      userSelectedTime: "全天都可以",
+      sendDate: "",
+      sendTime: ""
     };
   },
   mounted() {
@@ -98,13 +99,42 @@ export default {
     completeSelect() {
       this.timePickerBool = false;
       console.log(this.userSelectedDate, this.userSelectedTime);
+      if (this.dateNum === 0) {
+        let date = new Date();
+        let time = new Date().getTime();
+        let today = date.setTime(time);
+        this.sendDate = dayjs(today).format();
+        this.sendTime = this.userSelectedTime;
+        console.log(this.sendDate, this.sendTime);
+      } else if (this.dateNum === 1) {
+        let date = new Date();
+        let time = new Date().getTime();
+        let nextDay = date.setTime(time + 24 * 60 * 60 * 1000);
+        this.sendDate = dayjs(nextDay).format();
+        this.sendTime = this.userSelectedTime;
+        console.log(this.sendDate, this.sendTime);
+      } else if (this.dateNum === 2) {
+        let date = new Date();
+        let time = new Date().getTime();
+        let nextTwoDay = date.setTime(time + 24 * 60 * 60 * 1000 * 2);
+        this.sendDate = dayjs(nextTwoDay).format();
+        this.sendTime = this.userSelectedTime;
+        console.log(this.sendDate, this.sendTime);
+      } else if (this.dateNum === 3) {
+        let date = new Date();
+        let time = new Date().getTime();
+        let nextThreeDay = date.setTime(time + 24 * 60 * 60 * 1000 * 3);
+        this.sendDate = dayjs(nextThreeDay).format();
+        this.sendTime = this.userSelectedTime;
+        console.log(this.sendDate, this.sendTime);
+      }
     },
     getSelectDate() {
       let time = new Date().getTime();
       let newDate01 = new Date();
-      let newTime01 = newDate01.setTime(time + 86400000 * 2);
+      let newTime01 = newDate01.setTime(time + 24 * 60 * 60 * 1000 * 2);
       let newDate02 = new Date();
-      let newTime02 = newDate02.setTime(time + 86400000 * 3);
+      let newTime02 = newDate02.setTime(time + 24 * 60 * 60 * 1000 * 3);
       // 月份01处理
       if (newDate01.getMonth() < 10) {
         var month01 = "0" + (newDate01.getMonth() + 1);

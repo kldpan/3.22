@@ -12,12 +12,12 @@
         <div class="weight clearfix">
           <span class="name">货物重量</span>
           <span class="unit fr">吨</span>
-          <input type="number" placeholder="填写大于0吨" @blur="userInputWeight()" />
+          <input type="number" placeholder="填写大于0吨" v-model="userInputGoodWeight"/>
         </div>
         <div class="volume clearfix">
           <span class="name">货物体积</span>
           <span class="unit fr">方</span>
-          <input type="number" placeholder="填写大于0方" @blur="userInputVolume()" />
+          <input type="number" placeholder="填写大于0方" v-model="userInputGoodVolume"/>
         </div>
       </div>
 
@@ -245,9 +245,8 @@
 
 <script>
 import Vue from "vue";
-import { DatetimePicker } from "mint-ui";
-Vue.component(DatetimePicker.name, DatetimePicker);
 import timepicker from "../common/timepicker.vue";
+import {Toast} from 'mint-ui';
 export default {
   data() {
     return {
@@ -265,8 +264,8 @@ export default {
         "煤炭矿产"
       ],
       userSelectedType: "",
-      userWeigth: 0,
-      userVolume: 0,
+      userInputGoodWeight: '',
+      userInputGoodVolume: '',
       userGoodName: "",
       price: 0,
       carTypeModalBool: false,
@@ -287,9 +286,8 @@ export default {
       saveChecked: true,
       inputChecked: false,
       selectWhichPriceChecked: true,
-
-      //   时间选择器相关
-      userSelectedTime: ""
+      instance:0,
+      toastInstanse:null
     };
   },
   components: {
@@ -300,11 +298,14 @@ export default {
     console.log(this);
     if (this.$route.query.userInputNote) {
       this.params = this.$route.query;
-    }
-
-    //   计算距离
-    // console.log(JSON.parse(localStorage.getItem("senderInfo")));
+    };
     this.getDistance();
+    setTimeout(() => {this.getDistance()},1000);
+  },
+  watch:{
+    userInputGoodWeight(){
+      console.log(this.userInputGoodWeight)
+    }
   },
   methods: {
     go(n) {
@@ -344,6 +345,43 @@ export default {
       this.carLengthNum = index;
       this.userSelectedCarLength = item;
       // 发接口
+      if(!this.userInputGoodWeight){
+        this.toastInstanse = Toast({
+            message: "请填写货物重量",
+            position: "top",
+            duration: 1000
+          });
+          this.toastInstanse.$el.style.zIndex = 10000000;
+      }
+      // if(this.distance === 0){
+      //   this.toastInstanse = Toast({
+      //       message: "请确认装货地址和卸货地址",
+      //       position: "middle",
+      //       duration: 1000
+      //     });
+      //     this.toastInstanse.$el.style.zIndex = 10000000;
+      // }
+      if(this.userInputGoodWeight && this.distance === 0){
+        this.toastInstanse = Toast({
+            message: "请先填写货物重量",
+            position: "top",
+            duration: 1000
+          });
+          this.toastInstanse.$el.style.zIndex = 10000000;
+      }
+      if(this.userInputGoodWeight && this.distance !==0){
+        if(this.userInputGoodWeight !== '0'){
+          let countData = {
+            goodWeight:Number(this.userInputGoodWeight) || 0,
+            distance:this.$store.state.distance,
+            carLength:this.userSelectedCarLength
+          }
+          console.log(countData);
+        }else {
+          
+        }
+      }
+      
     },
     selectCarType(item, index) {
       this.carTypeNum = index;
@@ -434,43 +472,8 @@ export default {
     },
     autoPrice() {},
     getDistance() {
-      let sendInfo = JSON.parse(localStorage.getItem("senderInfo"));
-      //   console.log(sendInfo);
-      let recieveInfo = JSON.parse(localStorage.getItem("recieveInfo"));
-      //   console.log(recieveInfo);
-      let sendCenter = sendInfo.addCenter;
-      let recieveCenter = recieveInfo.addCenter;
-      //   直接坐标测距
-      //   let basicDistance = AMap.GeometryUtil.distance(sendCenter, recieveCenter);
-      //   console.log(basicDistance);
-      //   this.distance = parseInt(basicDistance / 1000);
-      //   console.log(this.distance);
-
-      // 调用货车路线规划测距
-      AMap.plugin("AMap.Driving", function() {
-        var driving = new AMap.Driving({
-          // 驾车路线规划策略，AMap.DrivingPolicy.LEAST_TIME是最快捷模式;  LEAST_FEE是最经济模式;  LEAST_DISTANCE是最短距离模式;   REAL_TRAFFIC是考虑实时路况模式
-          policy: AMap.DrivingPolicy.REAL_TRAFFIC
-          //
-        });
-
-        var startLngLat = sendCenter;
-        var endLngLat = recieveCenter;
-
-        driving.search(startLngLat, endLngLat, function(status, result) {
-          // 未出错时，result即是对应的路线规划方案
-          console.log(result.routes[0].distance);
-          for (let key in self.__VUE_HOT_MAP__) {
-            if (key === "6fb47643") {
-              let loadmapComponent = self.__VUE_HOT_MAP__[key].instances[0];
-              loadmapComponent.distance = Math.round(
-                result.routes[0].distance / 1000
-              );
-              console.log(loadmapComponent.distance);
-            }
-          }
-        });
-      });
+      console.log(this.$store.state.distance);
+      this.distance = this.$store.state.distance;
     },
 
     //   时间选择器相关
@@ -481,10 +484,6 @@ export default {
     handleConfirm(data) {
       this.birthday = getDate(data); //获取的时间为时间戳，getdata是自己写的一个转换时间的方法
     },
-    getDate(data) {
-      let date = new Date();
-      data = date;
-    }
   }
 };
 </script>

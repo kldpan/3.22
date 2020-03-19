@@ -16,7 +16,7 @@ const routes = [{
           name: "delivery",
           component: () => import("@/components/delivery/delivery.vue"),
           meta: {
-            title: "发布货源"
+            title: "发布货源",
           },
         },
         {
