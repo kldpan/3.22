@@ -32,6 +32,8 @@ export function initStore() {
       loggedIn: !!localStorage.getItem("sessionId"),
       authToken: null,
 
+      cargoSources: [],
+
       // 当前位置信息
       location: {},
       // 当前地址
@@ -91,10 +93,17 @@ export function initStore() {
 
       setSessionId(state, value) {
         localStorage.setItem("sessionId", value);
+        console.log("setSessionId", value);
         state.sessionId = value;
       },
       setLoggedIn(state, value) {
         state.loggedIn = value;
+      },
+      setAuthToken(state, value) {
+        state.authToken = value;
+      },
+      setCargoSources(state, value) {
+        state.cargoSources = value;
       }
     },
     actions: {
@@ -125,7 +134,11 @@ export function initStore() {
       }, distance) => {
         commit(distanceTypes.SET_DISTANCE, distance);
       },
-      async login({ commit }, mobile, verifyCode) {
+
+      
+
+      async login({ commit }, { mobile, verifyCode }) {
+        console.log(">>", mobile, verifyCode)
         let { sessionId, loggedIn, message } = await api2.post("/login", { mobile, verifyCode }).then(res => res.data);
         if (loggedIn) {
           commit("setSessionId", sessionId);
@@ -137,22 +150,40 @@ export function initStore() {
         return api2.get("/freight-calc", { params: params }).then(res => res.data.price);
       },
 
-      async requestVerifyCode({  }, mobile) {
+      async requestVerifyCode({  }, { mobile }) {
         await api2.post("/verify-code", { mobile });
+      },
+
+      async fetchCargoSources({ commit }) {
+        let cargoSources = await api.get("/my/cargo-sources").then(res => res.data);
+        commit("setCargoSources", cargoSources);
+      },
+
+      async deleteCargoSource({ commit, state }, { id }) {
+        let cargoSources = state.cargoSources.filter(cs => cs.id != id);
+        commit("setCargoSources", cargoSources);
       }
     }
   });
 
   api.interceptors.request.use(async function (config) {
+    let authToken;
+    console.log("store.state.sessionId", store.state.sessionId)
+    console.log("store.state.authToken", store.state.authToken)
     if (store.state.sessionId) {
       let needRefresh = true;
-      if (store.state.authToken && store.state.authToken.expiresAt) {
-        needRefresh = dayjs(store.state.authToken.expiresAt).subtract(2, "minute").isAfter(Date.now());
+      if (store.state.authToken) {
+        authToken = store.state.authToken;
+        needRefresh = dayjs(store.state.authToken.expiresAt).subtract(2, "minute").isBefore(Date.now());
       }
-      if (needRefresh) store.state.authToken = await requestAuthToken(store.state.sessionId);
-      if (!config.headers) config.headers = {};
-      config.headers["Authorization"] = `Bearer ${store.state.authToken.accessToken}`;
+      if (needRefresh) {
+        authToken = await requestAuthToken(store.state.sessionId);
+        console.log("authToken", authToken);
+        store.commit("setAuthToken", authToken);
+      }
     }
+    if (!config.headers) config.headers = {};
+    if (authToken) config.headers["Authorization"] = `Bearer ${authToken.accessToken}`;
     return config;
   });
 
