@@ -1,5 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
+console.log(Vue);
+console.log(instance);
 
 Vue.use(Vuex); //this.$store.state
 
@@ -15,6 +17,12 @@ const distanceTypes = {
   SET_DISTANCE: "SET_DISTANCE"
 }
 
+// 接口类型
+const interfaceTypes = {
+  GET_VERIFY_CODE_DATA: "GET_VERIFY_CODE_DATA",
+  GET_LOGIN_DATA: "GET_LOGIN_DATA",
+}
+
 export default new Vuex.Store({
   state: {
     // 当前位置信息
@@ -25,6 +33,13 @@ export default new Vuex.Store({
     distanceInfo: {},
     // 间距
     distance: 0,
+
+    // 接口数据
+    // 发送手机号
+    verifyCodeData: {},
+    // login
+
+
   },
 
   getters: {
@@ -105,6 +120,42 @@ export default new Vuex.Store({
       commit(distanceTypes.SET_DISTANCE, distance);
     },
 
+    // 发送手机号接口
+    _sendPhone(context, options) {
+      console.log(context);
+      console.log(options);
 
+      return instance({
+        url: "/verify-code",
+        method: "POST",
+        data: data
+      })
+
+      // _getList(context, options) {
+      //   return axios.get('/page/list', {
+      //     params: {
+      //       ...options
+      //     }
+      //   }).then(res => {
+      //     if (res.code === 'ok') {
+      //       return promise.resolve(res)
+      //     }
+      //   })
+      // }
+
+      // actions: {
+      //   getMessage({ commit }){
+      //     var msg = getMsg();
+      //     commit('updateMsg', msg);
+      //   }
+      // },
+
+      // mutations: {
+      //   updateMsg({ state }, msg){
+      //     state.message = msg;
+      //   }
+      // }
+
+    }
   }
 })
