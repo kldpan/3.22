@@ -187,7 +187,7 @@
           </div>
         </div>
         <!-- 有价格时左 -->
-        <div class="autoprice fl" v-else="priceData.length !== 0">
+        <div class="autoprice fl" v-else>
           <div class="totalprice">
             <input type="radio" :checked="selectWhichPriceChecked" @click="selectWhichPrice()" />
             <span>{{'￥' + priceData[0]}}</span>
@@ -203,7 +203,7 @@
           </div>
         </div>
         <!-- 用户输入时右 -->
-        <div class="userpriceshow fr" v-else="userInputPrice">
+        <div class="userpriceshow fr" v-else>
           <div class="userprice">
             <div class="pricearea">
               <input type="radio" :checked="!selectWhichPriceChecked" @click="selectWhichPrice()" />
