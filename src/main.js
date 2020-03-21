@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import AMap from 'vue-amap'
 import VueTouch from 'vue-touch'
-
+import Vuex from "vuex";
 import App from './App.vue'
 import router from './router/index.js'
 import './router/routeguard.js'
@@ -10,7 +10,7 @@ import './router/routeguard.js'
 // import { MessageBox } from "mint-ui";
 // Vue.use(MessageBox);
 
-import store from '@/core/store'
+import { initStore } from '@/store'
 
 import http from '@/core/api/http.js'
 
@@ -31,6 +31,7 @@ Vue.component('Upload', Upload);
 Vue.use(vueWechatTitle);
 Vue.use(coreConfig); //fn(){}
 
+Vue.use(Vuex);
 Vue.use(AMap);
 AMap.initAMapApiLoader({
   key: 'b04b292ba4b2140151e9c2bcd02bad0c',
@@ -73,6 +74,6 @@ Vue.config.productionTip = false;
 
 new Vue({
   router,
-  store,
+  store: initStore(),
   render: h => h(App)
 }).$mount('#app')
