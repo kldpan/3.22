@@ -104,5 +104,7 @@ export default new Vuex.Store({
     }, distance) => {
       commit(distanceTypes.SET_DISTANCE, distance);
     },
+
+
   }
 })
