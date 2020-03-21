@@ -2,24 +2,24 @@
   <div class="permanent">
     <!-- <div class="frequent"> -->
       <ul>
-        <li v-for="(item,index) in frequentGoodsList" :key="index" class="frequentGoods">
+        <li v-for="(source,index) in $store.state.cargoSources" :key="index" class="frequentGoods">
           <!-- 第一层 -->
           <div class="floor-n1 clearfix">
-            <div class="from fl">{{item.fromBigArea}}</div>
+            <div class="from fl">{{toCityName(source.origin)}}</div>
             <span class="direct fl"></span>
-            <div class="to fl">{{item.toBigArea}}</div>
+            <div class="to fl">{{toCityName(source.destination)}}</div>
           </div>
           <!-- 第二层 -->
           <div class="floor-n2 clearfix">
-            <span class="carlength">{{item.carLength}}</span>
-            <span class="carstyle">{{item.carStyle}}</span>
-            <span class="goodsinfo">{{item.goodsWeight ? item.goodsWeight : item.goodsVolume}}</span>
-            <span class="goodsName">/{{item.goodsName}}</span>
+            <span class="carlength">{{source.vehicle.length}}米</span>
+            <span class="carstyle">{{source.vehicle.type}}</span>
+            <span class="goodsinfo">{{source.cargo.weight}}吨</span>
+            <span class="goodsName">/{{source.cargo.type}}</span>
           </div>
           <!-- 第三层 -->
           <div class="floor-n3">
             <button class="fastDelivery">再发一单</button>
-            <button class="delete">删除</button>
+            <button class="delete" @click="del(source)">删除</button>
           </div>
         </li>
       </ul>
@@ -30,22 +30,33 @@
 </template>
 
 <script>
-export default {
-  data(){
-    return {
-      frequentGoodsList:[
-        {fromBigArea:'江苏省',fromSmallArea:'苏州市',toBigArea:'北京市',toSmallArea:'昌平',carLength:'13米车',carStyle:'平板', goodsName:'棉花',goodsWeight:'5吨',goodsVolume:''},
-        {fromBigArea:'江苏省',fromSmallArea:'苏州市',toBigArea:'北京市',toSmallArea:'昌平',carLength:'13米车',carStyle:'平板', goodsName:'棉花',goodsWeight:'',goodsVolume:'600立方'},
-        {fromBigArea:'江苏省',fromSmallArea:'苏州市',toBigArea:'北京市',toSmallArea:'昌平',carLength:'13米车',carStyle:'平板', goodsName:'棉花',goodsWeight:'5吨',goodsVolume:''},
-        {fromBigArea:'江苏省',fromSmallArea:'苏州市',toBigArea:'北京市',toSmallArea:'昌平',carLength:'13米车',carStyle:'平板', goodsName:'棉花',goodsWeight:'',goodsVolume:'200立方'},
-      ],
+import data from "@/components/common/address.json";
+
+const map = new Map();
+for (let record1 of data) {
+  for (let record2 of record1.childs) {
+    for (let record3 of record2.childs) {
+      map.set(record3.code, record3.name);
     }
+  }
+}
+
+export default {
+  async created() {
+    await this.$store.dispatch("fetchCargoSources");
   },
   mounted(){
     
   },
-  methods:{
+  methods: {
 
+    toCityName(code) {
+      return map.get(code.substring(0, 6));
+    },
+
+    async del(source) {
+      await this.$store.dispatch("deleteCargoSource", source);
+    }
   }
 };
 </script>
