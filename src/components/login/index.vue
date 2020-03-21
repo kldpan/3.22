@@ -82,52 +82,38 @@ export default {
     };
   },
   computed: {
-    isLogin() {
-      if (this.form01.phone && this.form01.code) return false;
-      else return true;
-    }
+    // isLogin() {
+    //   if (this.form01.phone && this.form01.code) return false;
+    //   else return true;
+    // }
   },
   mounted() {},
   methods: {
     toPath(url) {
       this.$router.push(url);
     },
-    toLogin() {
+    async toLogin() {
       // 如果有错误提醒，先取消错误提醒
 
-      let data = {
-        mobile: this.form01.phone,
-        verifyCode: this.form01.code
-      };
       // 发请求
-      instance({
-        method: "post",
-        url: "/login",
-        data: data
-      })
-        .then(res => {
-          console.log(res);
-          // 请求成功后，保存登录状态并跳转页面
-          // 将接口中返回的data数据统一放入localStorage和vuex中(localStorage中只存串，存对象时先转串再存，取出时解串，存一个数据时不用转)
-          let loginData = {
-            login: true,
-            accessToken: res.data.accessToken,
-            refreshToken: res.data.refreshToken,
-            accessExpireTime: res.data.accessExpireTime,
-            refreshExpireTime: res.data.refreshExpireTime
-          };
-          localStorage.setItem("loginData", JSON.stringify(loginData));
-          this.$store.commit("getLoginData", loginData);
-          this.toPath("/");
-        })
-        .catch(err => {
-          // 返回失败信息
-          // this.errors = {
-          //   code: err.response.data.msg
-          // }
-          this.toPath("/login");
-          console.log(1111);
+      let { loggedIn, message } = await this.$store.dispatch(
+        "login",
+        this.form01.phone,
+        this.form01.code
+      );
+      if (!loggedIn) {
+        // this.toPath({
+        //   path: "/"
+        // });
+        console.log("哈哈哈哈");
+      } else {
+        this.toastInstanse = Toast({
+          message: message,
+          position: "center",
+          duration: 1000
         });
+        this.toastInstanse.$el.style.zIndex = 10000000;
+      }
     },
     back() {
       this.$router.go(0);
@@ -165,23 +151,22 @@ export default {
         }
       }, 1000);
     },
-    sendCode() {
+    async sendCode() {
       // 验证手机号格式
       let reg = /^1[3456789]\d{9}$/;
       if (reg.test(this.form01.phone)) {
         // 如果格式正确发送网络请求
         // console.log(111);
         this.timerBtn();
-        let data = {
-          mobile: this.form01.phone
-        };
-        instance({
-          url: "/verify-code",
-          method: "POST",
-          data: data
-        }).then(res => {
-          console.log(res);
-        });
+        await this.$store.dispatch("requestVerifyCode", this.form01.phone);
+
+        // instance({
+        //   url: "/verify-code",
+        //   method: "POST",
+        //   data: data
+        // }).then(res => {
+        //   console.log(res);
+        // });
       } else {
         this.toastInstanse = Toast({
           message: "请填写正确的手机号",
@@ -189,14 +174,10 @@ export default {
           duration: 1000
         });
         this.toastInstanse.$el.style.zIndex = 10000000;
-        console.log("0000");
         setTimeout(() => {
           this.form01.phone = "";
         }, 800);
       }
-      // this.validatePhone(this.form01.phone);
-      // console.log(this.form01.phone);
-      // 发送请求
     },
     showCall() {
       this.callBool = true;
