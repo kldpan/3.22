@@ -339,6 +339,16 @@ export default {
     //   next();
     // }
   },
+  // 路由守卫
+  beforeRouteLeave(to, from, next) {
+    console.log(to);
+    console.log(from);
+    console.log(next);
+    if (to.path === "/deliverydetails") {
+      // 获取cookie内的token
+      console.log(this);
+    }
+  },
   methods: {
     changeLoadWay(item, index) {
       this.num = index;

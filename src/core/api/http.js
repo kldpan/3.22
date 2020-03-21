@@ -1,15 +1,19 @@
 import axios from "axios";
+import {
+  getCookie
+} from '../../util/util.js';
 
 // instance即封装好的axios,全局注册后直接调用即可
 var instance = axios.create({
+  // baseURL: "http://consignor-api.manyi.oureway.com:8080/",
   baseURL: "",
   timeout: 10000,
   transformRequest: [
-    function(data) {
+    function (data) {
       // 对 data 进行任意转换处理
       // 在请求发出之前 ajax 传入参数
       // JSON.stringify()
-    
+
 
       return data;
     }
@@ -17,7 +21,7 @@ var instance = axios.create({
 
   // `transformResponse` 在传递给 then/catch 前，允许修改响应数据
   transformResponse: [
-    function(data) {
+    function (data) {
       // 对 data 进行任意转换处理
 
       return data;
@@ -28,31 +32,47 @@ var instance = axios.create({
   responseType: 'json'
 });
 
-// 什么是拦截器  项目里面所有的请求发送前
+// 什么是拦截器  项目里面所有的请求发送前（通过该拦截器，将cookie传入后台）
 instance.interceptors.request.use(config => {
     // 在发送请求之前做些什么
-    //打开loading
+    // 例如此时可以打开loading
 
-    // config.headers.token="xxxxxxsalkfhsdjkfh"
-    // 加入一些通用配置 通用参数
-    // console.log(config)
-
+    const token = getCookie('session'); //获取cookie
+    config.data = JSON.stringify(config.data);
+    config.headers = {
+      'Content-Type': 'application/x-www-form-urlencoded' //设置跨域头部
+    };
+    if (token) {
+      config.params = {
+        'token': token
+      } //后台接收的参数
+    }
     return config;
-  }, function (error) {
+  },
+  error => {
     // 对请求错误做些什么
-    
     return Promise.reject(error);
   });
 
 // 添加响应拦截器
 instance.interceptors.response.use(response => {
     // 对响应数据做点什么
-    // console.log(response)
-    //关闭loading
+    // 例如此时可以关闭loading
+
+    //response.data.errCode是我接口返回的值，如果值为2，说明Cookie丢失
+    if (response.data.errCode == 2) {
+      router.push({
+        path: '/login',
+        query: {
+          redirect: router.currentRoute.fullPath
+        } //从哪个页面跳转
+      })
+    }
     return response;
-  }, function (error) {
+  },
+  error => {
     // 对响应错误做点什么
-    return Promise.reject(error);
+    return Promise.reject(error.response.data);
   });
 
 export default instance;
@@ -62,3 +82,74 @@ export default instance;
 //   .then(axios.spread(function (acct, perms) {
 //     // 两个请求现在都执行完成
 //   }));
+
+
+
+// fetch 请求方法
+// @param url
+// @param params
+// @returns {Promise}
+
+// export function fetch(url, params = {}) {
+//   return new Promise((resolve, reject) => {
+//     axios.get(url, {
+//         params: params
+//       })
+//       .then(response => {
+//         resolve(response.data);
+//       })
+//       .catch(err => {
+//         reject(err)
+//       })
+//   })
+// }
+
+//  post 请求方法
+//  @param url
+//  @param data
+//  @returns { Promise }
+
+// export function post(url, data = {}) {
+//   return new Promise((resolve, reject) => {
+//     axios.post(url, data)
+//       .then(response => {
+//         resolve(response.data);
+//       }, err => {
+//         reject(err);
+//       })
+//   })
+// }
+
+
+// patch 方法封装
+// @param url
+// @param data
+// @returns {Promise}
+
+// export function patch(url, data = {}) {
+//   return new Promise((resolve, reject) => {
+//     axios.patch(url, data)
+//       .then(response => {
+//         resolve(response.data);
+//       }, err => {
+//         reject(err);
+//       })
+//   })
+// }
+
+
+// put 方法封装
+// @param url
+// @param data
+// @returns {Promise}
+
+// export function put(url, data = {}) {
+//   return new Promise((resolve, reject) => {
+//     axios.put(url, data)
+//       .then(response => {
+//         resolve(response.data);
+//       }, err => {
+//         reject(err);
+//       })
+//   })
+// }

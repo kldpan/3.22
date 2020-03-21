@@ -15,8 +15,10 @@ const routes = [{
           path: "/index/delivery",
           name: "delivery",
           component: () => import("@/components/delivery/delivery.vue"),
+          showFooter: true,
           meta: {
             title: "发布货源",
+            requireAuth: true //requireAuth用于钩子函数中验证用户是否存在
           },
         },
         {
@@ -216,14 +218,6 @@ const routes = [{
         title: "测试地图",
       }
     },
-    // {
-    //   path: "goodsInfo",
-    //   name:"goodsInfo",
-    //   component: () => import("@/components/goodsInfo.vue"),
-    //   meta: {
-    //     title: "货物信息",
-    //   }
-    // },
     {
       path: "map",
       name: "map",

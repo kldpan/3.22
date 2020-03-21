@@ -12,12 +12,17 @@
         <div class="weight clearfix">
           <span class="name">货物重量</span>
           <span class="unit fr">吨</span>
-          <input type="number" placeholder="填写大于0吨" v-model="userInputGoodWeight"/>
+          <input
+            type="number"
+            placeholder="填写大于0吨"
+            v-model="userInputGoodWeight"
+            @focus="userInputGoodWeight = ''"
+          />
         </div>
         <div class="volume clearfix">
           <span class="name">货物体积</span>
           <span class="unit fr">方</span>
-          <input type="number" placeholder="填写大于0方" v-model="userInputGoodVolume"/>
+          <input type="number" placeholder="填写大于0方" v-model="userInputGoodVolume" />
         </div>
       </div>
 
@@ -37,7 +42,7 @@
         <div class="inputtype">
           <div class="othergood">其他物品</div>
           <div class="inputbox" ref="goodname">
-            <input type="text" placeholder="请输入其他物品名称" @blur="userInputGoodName()" />
+            <input type="text" placeholder="请输入其他物品名称" v-model="userInputGoodName" />
           </div>
         </div>
       </div>
@@ -246,7 +251,7 @@
 <script>
 import Vue from "vue";
 import timepicker from "../common/timepicker.vue";
-import {Toast} from 'mint-ui';
+import { Toast } from "mint-ui";
 export default {
   data() {
     return {
@@ -264,9 +269,9 @@ export default {
         "煤炭矿产"
       ],
       userSelectedType: "",
-      userInputGoodWeight: '',
-      userInputGoodVolume: '',
-      userGoodName: "",
+      userInputGoodWeight: "",
+      userInputGoodVolume: "",
+      userInputGoodName: "",
       price: 0,
       carTypeModalBool: false,
       carLength: [17.5, 13, 9.6, 7.6, 6.8],
@@ -286,8 +291,8 @@ export default {
       saveChecked: true,
       inputChecked: false,
       selectWhichPriceChecked: true,
-      instance:0,
-      toastInstanse:null
+      instance: 0,
+      toastInstanse: null
     };
   },
   components: {
@@ -298,13 +303,15 @@ export default {
     console.log(this);
     if (this.$route.query.userInputNote) {
       this.params = this.$route.query;
-    };
+    }
     this.getDistance();
-    setTimeout(() => {this.getDistance()},1000);
+    setTimeout(() => {
+      this.getDistance();
+    }, 1000);
   },
-  watch:{
-    userInputGoodWeight(){
-      console.log(this.userInputGoodWeight)
+  watch: {
+    userInputGoodWeight() {
+      console.log(this.userInputGoodWeight);
     }
   },
   methods: {
@@ -324,9 +331,6 @@ export default {
     userInputVolume() {
       this.userVolume = this.$refs.size.lastChild.lastChild.value || 0;
     },
-    userInputGoodName() {
-      this.userGoodName = this.$refs.goodname.children[0].value;
-    },
     carTypeModalShow() {
       this.carTypeModalBool = true;
     },
@@ -345,43 +349,39 @@ export default {
       this.carLengthNum = index;
       this.userSelectedCarLength = item;
       // 发接口
-      if(!this.userInputGoodWeight){
+      if (!this.userInputGoodWeight) {
         this.toastInstanse = Toast({
-            message: "请填写货物重量",
-            position: "top",
+          message: "请填写货物重量",
+          position: "center",
+          duration: 1000
+        });
+        this.toastInstanse.$el.style.zIndex = 10000000;
+      } else {
+        if (Number(this.userInputGoodWeight) <= 0) {
+          this.toastInstanse = Toast({
+            message: "填写货物重量大于0吨",
+            position: "center",
             duration: 1000
           });
           this.toastInstanse.$el.style.zIndex = 10000000;
-      }
-      // if(this.distance === 0){
-      //   this.toastInstanse = Toast({
-      //       message: "请确认装货地址和卸货地址",
-      //       position: "middle",
-      //       duration: 1000
-      //     });
-      //     this.toastInstanse.$el.style.zIndex = 10000000;
-      // }
-      if(this.userInputGoodWeight && this.distance === 0){
-        this.toastInstanse = Toast({
-            message: "请先填写货物重量",
-            position: "top",
-            duration: 1000
-          });
-          this.toastInstanse.$el.style.zIndex = 10000000;
-      }
-      if(this.userInputGoodWeight && this.distance !==0){
-        if(this.userInputGoodWeight !== '0'){
+          this.userInputGoodWeight = "";
+        } else {
           let countData = {
-            goodWeight:Number(this.userInputGoodWeight) || 0,
-            distance:this.$store.state.distance,
-            carLength:this.userSelectedCarLength
-          }
+            goodWeight: Number(this.userInputGoodWeight),
+            distance: this.$store.state.distance,
+            carLength: this.userSelectedCarLength
+          };
           console.log(countData);
-        }else {
-          
+          // 发接口
+          instance({
+            method: "get",
+            // url:"http://192.168.0.116:8080/login/verify/" + this.form01.phone + "/" + this.form01.code,
+            data: countData
+          })
+            .then(res => {})
+            .catch(() => {});
         }
       }
-      
     },
     selectCarType(item, index) {
       this.carTypeNum = index;
@@ -483,7 +483,7 @@ export default {
     },
     handleConfirm(data) {
       this.birthday = getDate(data); //获取的时间为时间戳，getdata是自己写的一个转换时间的方法
-    },
+    }
   }
 };
 </script>
