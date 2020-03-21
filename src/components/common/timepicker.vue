@@ -41,7 +41,7 @@
 <script>
 import dayjs from "dayjs";
 let date = new Date();
-console.log(date.getFullYear());
+console.log(dayjs(date.getTime()).startOf("day"));
 export default {
   data() {
     return {

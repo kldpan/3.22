@@ -11,10 +11,10 @@
       <h1>登录</h1>
       <div class="inputArea">
         <div class="phone" ref="inputPhone">
-          <input type="number" placeholder="请输入手机号" v-model="form01.phone"/>
+          <input type="number" placeholder="请输入手机号" v-model="form01.phone" />
         </div>
-        <div class="code">
-          <input type=number placeholder="请输入验证码" v-model="form01.code"/>
+        <div class="code clearfix">
+          <input type="number" placeholder="请输入验证码" v-model="form01.code" />
           <button v-if="btnTitle" :disabled="timeDisabledBool" @click="sendCode()">{{btnTitle}}</button>
         </div>
       </div>
@@ -56,145 +56,159 @@
     </div>
 
     <!-- 手机号填错提示模态 -->
-    <div class="errPhoneModal" v-show="errPhoneModalBool" @click="closeErrPhoneModal()">
-      <div class="notice">请输入正确的手机号码！</div> 
-    </div>
-
+    <!-- <div class="errPhoneModal" v-show="errPhoneModalBool" @click="closeErrPhoneModal()">
+      <div class="notice">请输入正确的手机号码！</div>
+    </div>-->
   </div>
 </template>
 
 <script>
-// import instance from '@/core/api/http.js';
+import instance from "@/core/api/http.js";
 import Vue from "vue";
+import { Toast } from "mint-ui";
 export default {
-  data(){
+  data() {
     return {
       // mine
-      btnTitle:'获取验证码',
-      timeDisabledBool:false,
-      errors:{},
-      form01:{
-        phone:'',
-        code:'',
+      btnTitle: "获取验证码",
+      timeDisabledBool: false,
+      errors: {},
+      form01: {
+        phone: "",
+        code: ""
       },
-      callBool:false,
-      errPhoneModalBool:false,
-    }
+      callBool: false
+      // errPhoneModalBool: false
+    };
   },
-  computed:{
-    isLogin(){
-      if(this.form01.phone && this.form01.code) return false;
+  computed: {
+    isLogin() {
+      if (this.form01.phone && this.form01.code) return false;
       else return true;
     }
   },
-  mounted(){
-
-  },
+  mounted() {},
   methods: {
-    toPath(url){
+    toPath(url) {
       this.$router.push(url);
     },
-    toLogin(){
+    toLogin() {
       // 如果有错误提醒，先取消错误提醒
 
+      let data = {
+        mobile: this.form01.phone,
+        verifyCode: this.form01.code
+      };
       // 发请求
       instance({
-        method:"get",
-        url:"http://192.168.0.116:8080/login/verify/" + this.form01.phone + "/" + this.form01.code,
-        data:this.form01
+        method: "post",
+        url: "/login",
+        data: data
       })
-      .then(res=>{
-        console.log(res);
-        // 请求成功后，保存登录状态并跳转页面
-        // 将接口中返回的data数据统一放入localStorage和vuex中(localStorage中只存串，存对象时先转串再存，取出时解串，存一个数据时不用转)
-        let loginData = {
-          login:true,
-          accessToken:res.data.accessToken,
-          refreshToken:res.data.refreshToken,
-          accessExpireTime:res.data.accessExpireTime,
-          refreshExpireTime:res.data.refreshExpireTime,
-        }
-        localStorage.setItem('loginData',JSON.stringify(loginData));
-        this.$store.commit('getLoginData',loginData);
-        this.toPath('/');
-      })
-      .catch(err => {
-        // 返回失败信息
-        // this.errors = {
-        //   code: err.response.data.msg
-        // }
-        this.toPath('/login');
-        console.log(1111);
-      })
+        .then(res => {
+          console.log(res);
+          // 请求成功后，保存登录状态并跳转页面
+          // 将接口中返回的data数据统一放入localStorage和vuex中(localStorage中只存串，存对象时先转串再存，取出时解串，存一个数据时不用转)
+          let loginData = {
+            login: true,
+            accessToken: res.data.accessToken,
+            refreshToken: res.data.refreshToken,
+            accessExpireTime: res.data.accessExpireTime,
+            refreshExpireTime: res.data.refreshExpireTime
+          };
+          localStorage.setItem("loginData", JSON.stringify(loginData));
+          this.$store.commit("getLoginData", loginData);
+          this.toPath("/");
+        })
+        .catch(err => {
+          // 返回失败信息
+          // this.errors = {
+          //   code: err.response.data.msg
+          // }
+          this.toPath("/login");
+          console.log(1111);
+        });
     },
-    back(){
+    back() {
       this.$router.go(0);
     },
-    validatePhone(phone){
+    validatePhone(phone) {
       let reg = /^1[3456789]\d{9}$/;
-      if(!reg.test(phone)){
-        this.errPhoneModalBool = true;
-        setTimeout(() => {
-          this.closeErrPhoneModal();
-        },800)
+      if (!reg.test(phone)) {
+        // this.errPhoneModalBool = true;
+        // setTimeout(() => {
+        //   this.closeErrPhoneModal();
+        // }, 800);
+        this.toastInstanse = Toast({
+          message: "请填写正确的手机号",
+          position: "center",
+          duration: 1000
+        });
+        this.toastInstanse.$el.style.zIndex = 10000000;
       }
     },
-    closeErrPhoneModal(){
-      this.errPhoneModalBool = false;
-    },
-    timerBtn(){
+    // closeErrPhoneModal() {
+    //   this.errPhoneModalBool = false;
+    // },
+    timerBtn() {
       let time = 5;
       let timer = setInterval(() => {
-        if(time === 0){
+        if (time === 0) {
           clearInterval(timer);
           this.btnTitle = "获取验证码";
           this.timeDisabledBool = false;
-        }else {
+        } else {
           // 倒计时
-          this.btnTitle = time + '秒后重试';
+          this.btnTitle = time + "秒后重试";
           this.timeDisabledBool = true;
           time--;
         }
-      },1000);
+      }, 1000);
     },
-    sendCode(){
+    sendCode() {
       // 验证手机号格式
       let reg = /^1[3456789]\d{9}$/;
-      if(reg.test(this.form01.phone)){
+      if (reg.test(this.form01.phone)) {
         // 如果格式正确发送网络请求
         // console.log(111);
         this.timerBtn();
+        let data = {
+          mobile: this.form01.phone
+        };
         instance({
-          method:"get",
-          url:"http://192.168.0.116:8080/login/sendCode/" + this.form01.phone,
-          data:{phone:this.form01.phone}
-        }).then(res=>{
+          url: "/verify-code",
+          method: "POST",
+          data: data
+        }).then(res => {
           console.log(res);
         });
-
-      }else {
-        this.errPhoneModalBool = true;
-        console.log('0000');
+      } else {
+        this.toastInstanse = Toast({
+          message: "请填写正确的手机号",
+          position: "center",
+          duration: 1000
+        });
+        this.toastInstanse.$el.style.zIndex = 10000000;
+        console.log("0000");
         setTimeout(() => {
-          this.closeErrPhoneModal();
-          this.form01.phone = '';
-        },800)
+          this.form01.phone = "";
+        }, 800);
       }
       // this.validatePhone(this.form01.phone);
       // console.log(this.form01.phone);
       // 发送请求
     },
-    showCall(){
+    showCall() {
       this.callBool = true;
     },
-    callPhone(){
+    callPhone() {
       let phoneNumber = Number(this.$refs.callPhone.children[2].innerHTML);
-      window.location.href = 'tel://' + phoneNumber;
+      window.location.href = "tel://" + phoneNumber;
     },
-    cancelCall(){
+    cancelCall() {
       this.callBool = false;
-    },
-  },
+    }
+  }
   // mounted() {
   //   let dataw = Cookies.get("loginInfo") ? JSON.parse(Cookies.get("loginInfo")): {};
   //   if(dataw){
@@ -207,247 +221,253 @@ export default {
   //     this.form1.openid = '';
   //   }
   // }
-}
-
+};
 </script>
 
 <style lang="scss" scoped>
-.login{
-  width:100%;
-  height:r(1334);
-  background:#fff;
-  position:absolute;
-  z-index:100000;
+.login {
+  width: 100%;
+  height: r(1334);
+  background: #fff;
+  position: absolute;
+  z-index: 100000;
 
-  .top{
-    width:100%;
-    height:r(88);
-    border-bottom:1px dashed #333;
-    .back{
-      width:r(22);
-      height:r(36);
-      background:url(../../assets/back.png) no-repeat;
-      background-size:r(22) r(36);
-      margin:r(26) 0 0 r(30);
+  .top {
+    width: 100%;
+    height: r(88);
+    border-bottom: 1px dashed #333;
+    .back {
+      width: r(22);
+      height: r(36);
+      background: url(../../assets/back.png) no-repeat;
+      background-size: r(22) r(36);
+      margin: r(26) 0 0 r(30);
     }
-    .register{
-      font-family:PingFang SC;
-      font-size:r(34);
-      line-height:r(88);
-      margin-right:r(30);
-      color:#333;
+    .register {
+      font-family: PingFang SC;
+      font-size: r(34);
+      line-height: r(88);
+      margin-right: r(30);
+      color: #333;
     }
   }
 
-  .body{
-    width:100%;
-    height:r(566);
-    overflow:hidden;
-    h1{
-      font-size:r(56);
-      color:#333;
-      font-weight:500;
-      font-family:PingFang SC;
-      text-align:center;
-      margin-top:r(30);
+  .body {
+    width: 100%;
+    height: r(566);
+    overflow: hidden;
+    h1 {
+      font-size: r(56);
+      color: #333;
+      font-weight: 500;
+      font-family: PingFang SC;
+      text-align: center;
+      margin-top: r(30);
     }
-    .inputArea{
-      width:100%;
-      height:r(202);
-      margin-top:r(120);
-      .phone{
-        width:r(690);
-        height:r(86);
-        margin:0 auto;
-        input{
-          width:r(660);
-          height:r(86);
-          background:rgba(242,246,249,1);
-          border:none;
-          border-radius:r(16);
-          padding-left:r(30);
+    .inputArea {
+      width: 100%;
+      height: r(202);
+      margin-top: r(120);
+      .phone {
+        width: r(690);
+        height: r(86);
+        margin: 0 auto;
+        input {
+          width: r(690);
+          height: r(86);
+          background: rgba(242, 246, 249, 1);
+          border: none;
+          border-radius: r(16);
+          padding-left: r(30);
         }
       }
-      .code{
-        width:r(690);
-        height:r(86);
-        margin:r(30) auto 0;
-        border-radius:r(16);
-        background:rgba(242,246,249,1);
-        overflow:hidden;
-        input{
-          display:inline-block;
-          float:left;
-          width:r(300);
-          height:r(86);
-          background:rgba(242,246,249,1);
-          border:none;
-          border-radius:r(16);
-          padding-left:r(30);
-        }
-      }
-    }
-    .loginbtn{
-      width:r(690);
-      height:r(86);
-      margin:r(50) auto 0;
-      .submit{
-        width:r(690);
-        height:r(86);
+      .code {
+        width: r(690);
+        height: r(86);
+        margin: r(30) auto 0;
         border-radius: r(16);
-        background:rgba(242,246,249,1);
-        border:none;
+        background: rgba(242, 246, 249, 1);
+        overflow: hidden;
+        input {
+          display: inline-block;
+          float: left;
+          width: r(300);
+          height: r(86);
+          background: rgba(242, 246, 249, 1);
+          border: none;
+          border-radius: r(16);
+          padding-left: r(30);
+        }
+        button {
+          float: right;
+          background: rgba(242, 246, 249, 1);
+          border: none;
+          line-height: r(86);
+          margin-right: r(30);
+        }
+      }
+    }
+    .loginbtn {
+      width: r(690);
+      height: r(86);
+      margin: r(50) auto 0;
+      .submit {
+        width: r(690);
+        height: r(86);
+        border-radius: r(16);
+        background: rgba(242, 246, 249, 1);
+        border: none;
         font-size: r(32);
-        color:#999;
-        font-weight:100;
-        text-align:center;
-        line-height:r(86);
+        color: #999;
+        font-weight: 100;
+        text-align: center;
+        line-height: r(86);
       }
     }
   }
 
-  .loginmore{
-    width:r(100%);
-    height:r(200);
-    margin-top:r(125);
-    overflow:hidden;
-    text-align:center;
-    p{
-      color:#999;
-      font-size:r(26);
-      margin-bottom:r(30);
+  .loginmore {
+    width: r(100%);
+    height: r(200);
+    margin-top: r(125);
+    overflow: hidden;
+    text-align: center;
+    p {
+      color: #999;
+      font-size: r(26);
+      margin-bottom: r(30);
     }
-    .wx{
-      display:inline-block;
-      width:r(70);
-      height:r(70);
-      background:url(../../assets/vx.png) no-repeat;
-      background-size:r(70) r(70);
+    .wx {
+      display: inline-block;
+      width: r(70);
+      height: r(70);
+      background: url(../../assets/vx.png) no-repeat;
+      background-size: r(70) r(70);
     }
-    .qq{
-      display:inline-block;
-      width:r(70);
-      height:r(70);
-      background:url(../../assets/qq.png) no-repeat;
-      background-size:r(70) r(70);
-      margin:0 r(122);
+    .qq {
+      display: inline-block;
+      width: r(70);
+      height: r(70);
+      background: url(../../assets/qq.png) no-repeat;
+      background-size: r(70) r(70);
+      margin: 0 r(122);
     }
-    .sina{
-      display:inline-block;
-      width:r(70);
-      height:r(70);
-      background:url(../../assets/sina.png) no-repeat;
-      background-size:r(70) r(70);
-    }
-  }
-
-  .rules{
-    width:r(100%);
-    height:r(100);
-    margin-top:r(125);
-    overflow:hidden;
-    text-align:center;
-    p{
-      color:#999;
-      font-size:r(24);
-      margin-bottom:r(15);
-    }
-    .service{
-      color:#0350A0;
-      font-size:r(24);
-    }
-    .and{
-      color:#999;
-      font-size:r(24);
-    }
-    .privacy{
-      color:#0350A0;
-      font-size:r(24);
+    .sina {
+      display: inline-block;
+      width: r(70);
+      height: r(70);
+      background: url(../../assets/sina.png) no-repeat;
+      background-size: r(70) r(70);
     }
   }
 
-  .call{
-    width:100%;
-    height:r(128);
-    text-align:center;
-    line-height:r(128);
-    .phoneicon{
-      display:inline-block;
-      width:r(33);
-      height:r(33);
-      background:url(../../assets/phone.png) no-repeat;
-      background-size:r(33) r(33);
-      vertical-align:middle;
+  .rules {
+    width: r(100%);
+    height: r(100);
+    margin-top: r(125);
+    overflow: hidden;
+    text-align: center;
+    p {
+      color: #999;
+      font-size: r(24);
+      margin-bottom: r(15);
     }
-    .phonenum{
-      display:inline-block;
-      margin-left:r(20);
-      color:#999;
+    .service {
+      color: #0350a0;
+      font-size: r(24);
     }
-    .number{
-      color:#999;
+    .and {
+      color: #999;
+      font-size: r(24);
+    }
+    .privacy {
+      color: #0350a0;
+      font-size: r(24);
     }
   }
 
-  .callModal{
-    width:100%;
-    height:r(1334);
-    position:fixed;
-    top:0;
-    left:0;
-    z-index:10000000;
-    background:rgba(0,0,0,0.3);
-    .callnow{
-      width:r(690);
-      height:r(114);
-      margin:r(1056) auto 0;
-      background:#fff;
-      border-radius:r(20);
-      line-height:r(114);
-      .callicon{
-        display:inline-block;
-        width:r(46);
-        height:r(46);
-        background:url(../../assets/call.png) no-repeat;
-        background-size:r(46) r(46);
-        vertical-align:middle;
-        margin:0 r(30);
+  .call {
+    width: 100%;
+    height: r(128);
+    text-align: center;
+    line-height: r(128);
+    .phoneicon {
+      display: inline-block;
+      width: r(33);
+      height: r(33);
+      background: url(../../assets/phone.png) no-repeat;
+      background-size: r(33) r(33);
+      vertical-align: middle;
+    }
+    .phonenum {
+      display: inline-block;
+      margin-left: r(20);
+      color: #999;
+    }
+    .number {
+      color: #999;
+    }
+  }
+
+  .callModal {
+    width: 100%;
+    height: r(1334);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10000000;
+    background: rgba(0, 0, 0, 0.3);
+    .callnow {
+      width: r(690);
+      height: r(114);
+      margin: r(1056) auto 0;
+      background: #fff;
+      border-radius: r(20);
+      line-height: r(114);
+      .callicon {
+        display: inline-block;
+        width: r(46);
+        height: r(46);
+        background: url(../../assets/call.png) no-repeat;
+        background-size: r(46) r(46);
+        vertical-align: middle;
+        margin: 0 r(30);
       }
-      .callnum{
-        color:#108EE9;
-        font-size:r(40);
-        font-weight:500;
-        vertical-align:middle;
+      .callnum {
+        color: #108ee9;
+        font-size: r(40);
+        font-weight: 500;
+        vertical-align: middle;
       }
     }
-    .cancelcall{
-      width:r(690);
-      height:r(114);
-      margin:r(20) auto 0;
-      background:#fff;
-      border-radius:r(20);
-      text-align:center;
-      line-height:r(114);
-      font-size:r(40);
-      color:#108EE9;
-      font-weight:500;
+    .cancelcall {
+      width: r(690);
+      height: r(114);
+      margin: r(20) auto 0;
+      background: #fff;
+      border-radius: r(20);
+      text-align: center;
+      line-height: r(114);
+      font-size: r(40);
+      color: #108ee9;
+      font-weight: 500;
     }
   }
 
   // 模态框
-  .errPhoneModal{
-    width:100%;
-    height:r(1334);
-    position:fixed;
-    left:0;
-    top:0;
-    background:rgba(0,0,0,0.3);
-    display:flex;
-    .notice{
-      background:#fff;
-      font-size:r(32);
-      color:red;
-      margin:auto;
+  .errPhoneModal {
+    width: 100%;
+    height: r(1334);
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    .notice {
+      background: #fff;
+      font-size: r(32);
+      color: red;
+      margin: auto;
     }
   }
 }

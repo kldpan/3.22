@@ -159,7 +159,7 @@
         <!-- 第四层 -->
         <div class="foot">
           <span class="name">预估价：</span>
-          <span class="showprice">{{'0'}}</span>
+          <span class="showprice">{{'￥' + priceData[0]}}</span>
         </div>
       </div>
     </div>
@@ -190,10 +190,10 @@
         <div class="autoprice fl" v-else="priceData.length !== 0">
           <div class="totalprice">
             <input type="radio" :checked="selectWhichPriceChecked" @click="selectWhichPrice()" />
-            <span>{{'¥0.00'}}</span>
+            <span>{{'￥' + priceData[0]}}</span>
           </div>
-          <div class="averageprice">每吨约{{0}}元</div>
-          <div class="length">运距约{{0}}公里</div>
+          <div class="averageprice">每吨约{{parseInt(priceData[0]/userInputGoodWeight)}}元</div>
+          <div class="length">运距约{{distance}}公里</div>
         </div>
         <!-- 用户未输入时右 -->
         <div class="userpricenotice fr" v-if="!userInputPrice">
@@ -252,6 +252,7 @@
 import Vue from "vue";
 import timepicker from "../common/timepicker.vue";
 import { Toast } from "mint-ui";
+import instance from "@/core/api/http.js";
 export default {
   data() {
     return {
@@ -268,7 +269,7 @@ export default {
         "活禽活畜",
         "煤炭矿产"
       ],
-      userSelectedType: "",
+      userSelectedType: "棉麻布匹",
       userInputGoodWeight: "",
       userInputGoodVolume: "",
       userInputGoodName: "",
@@ -291,7 +292,7 @@ export default {
       saveChecked: true,
       inputChecked: false,
       selectWhichPriceChecked: true,
-      instance: 0,
+      distance: 0,
       toastInstanse: null
     };
   },
@@ -308,6 +309,7 @@ export default {
     setTimeout(() => {
       this.getDistance();
     }, 1000);
+    console.log(instance);
   },
   watch: {
     userInputGoodWeight() {
@@ -322,7 +324,7 @@ export default {
       this.$router.push(url);
     },
     selectGoodType(item, index) {
-      this.typeNum = index;
+      this.goodTypeNum = index;
       this.userSelectedType = item;
     },
     userInputWeight() {
@@ -367,18 +369,23 @@ export default {
           this.userInputGoodWeight = "";
         } else {
           let countData = {
-            goodWeight: Number(this.userInputGoodWeight),
+            weight: Number(this.userInputGoodWeight),
             distance: this.$store.state.distance,
-            carLength: this.userSelectedCarLength
+            vehicleLength: this.userSelectedCarLength
           };
           console.log(countData);
           // 发接口
           instance({
             method: "get",
-            // url:"http://192.168.0.116:8080/login/verify/" + this.form01.phone + "/" + this.form01.code,
-            data: countData
+            url: "/freight-calc",
+            params: countData
           })
-            .then(res => {})
+            .then(res => {
+              console.log(res.data);
+              // this.priceData = [];
+              this.priceData.push(res.data.price);
+              console.log(this.priceData);
+            })
             .catch(() => {});
         }
       }
