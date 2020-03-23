@@ -14,12 +14,12 @@
           <input type="number" placeholder="请输入手机号" v-model="form01.phone" />
         </div>
         <div class="code clearfix">
-          <input type="number" placeholder="请输入验证码" v-model="form01.code" />
+          <input type="number" placeholder="请输入验证码" v-model="form01.code" @input="actBtn()" />
           <button v-if="btnTitle" :disabled="timeDisabledBool" @click="sendCode()">{{btnTitle}}</button>
         </div>
       </div>
       <div class="loginbtn">
-        <button class="submit" @click="toLogin()" :disabled="isLogin">登录</button>
+        <button @click="toLogin()" :class="loginBool ? 'tologin' : 'nologin'" :disabled="isLogin">登录</button>
       </div>
     </div>
 
@@ -77,40 +77,48 @@ export default {
         phone: "",
         code: ""
       },
-      callBool: false
+      callBool: false,
       // errPhoneModalBool: false
+      loginBool: false
     };
   },
   computed: {
-    // isLogin() {
-    //   if (this.form01.phone && this.form01.code) return false;
-    //   else return true;
-    // }
+    isLogin() {
+      if (this.form01.phone && this.form01.code) return false;
+      else return true;
+    }
   },
+  watch: {},
   mounted() {},
   methods: {
     toPath(url) {
       this.$router.push(url);
     },
+    actBtn() {
+      if (this.form01.phone && this.form01.code) {
+        this.loginBool = true;
+      } else {
+        this.loginBool = false;
+      }
+    },
     async toLogin() {
       // 如果有错误提醒，先取消错误提醒
 
+      let data = {
+        mobile: this.form01.phone,
+        verifyCode: this.form01.code
+      };
       // 发请求
-      let { loggedIn, message } = await this.$store.dispatch(
-        "login",
-        this.form01.phone,
-        this.form01.code
-      );
-      if (!loggedIn) {
-        // this.toPath({
-        //   path: "/"
-        // });
-        console.log("哈哈哈哈");
+      let { loggedIn, message } = await this.$store.dispatch("login", data);
+      if (loggedIn) {
+        this.toPath({
+          path: "/"
+        });
       } else {
         this.toastInstanse = Toast({
-          message: message,
+          message,
           position: "center",
-          duration: 1000
+          duration: 2000
         });
         this.toastInstanse.$el.style.zIndex = 10000000;
       }
@@ -158,7 +166,9 @@ export default {
         // 如果格式正确发送网络请求
         // console.log(111);
         this.timerBtn();
-        await this.$store.dispatch("requestVerifyCode", this.form01.phone);
+        await this.$store.dispatch("requestVerifyCode", {
+          mobile: this.form01.phone
+        });
 
         // instance({
         //   url: "/verify-code",
@@ -292,11 +302,23 @@ export default {
       width: r(690);
       height: r(86);
       margin: r(50) auto 0;
-      .submit {
+      .nologin {
         width: r(690);
         height: r(86);
         border-radius: r(16);
         background: rgba(242, 246, 249, 1);
+        border: none;
+        font-size: r(32);
+        color: #999;
+        font-weight: 100;
+        text-align: center;
+        line-height: r(86);
+      }
+      .tologin {
+        width: r(690);
+        height: r(86);
+        border-radius: r(16);
+        background: #0350a0;
         border: none;
         font-size: r(32);
         color: #999;

@@ -18,7 +18,7 @@ export function initStore() {
 
   let api = axios.create({
     baseURL: "/api",
-  
+
   });
 
   let api2 = axios.create({
@@ -42,7 +42,7 @@ export function initStore() {
       distanceInfo: {},
       // 间距
       distance: 0,
-      
+
     },
     getters: {
       // 位置获取
@@ -135,31 +135,63 @@ export function initStore() {
         commit(distanceTypes.SET_DISTANCE, distance);
       },
 
-      
 
-      async login({ commit }, { mobile, verifyCode }) {
+
+      async login({
+        commit
+      }, {
+        mobile,
+        verifyCode
+      }) {
         console.log(">>", mobile, verifyCode)
-        let { sessionId, loggedIn, message } = await api2.post("/login", { mobile, verifyCode }).then(res => res.data);
+        let {
+          sessionId,
+          loggedIn,
+          message
+        } = await api2.post("/login", {
+          mobile,
+          verifyCode
+        }).then(res => res.data);
         if (loggedIn) {
           commit("setSessionId", sessionId);
         }
         commit("setLoggedIn", loggedIn);
-        return { loggedIn, message };
+        return {
+          loggedIn,
+          message
+        };
       },
-      async calculateFreight({ commit }, params) {
-        return api2.get("/freight-calc", { params: params }).then(res => res.data.price);
+      async calculateFreight({
+        commit
+      }, params) {
+        return api2.get("/freight-calc", {
+          params: params
+        }).then(res => res.data.price);
       },
 
-      async requestVerifyCode({  }, { mobile }) {
-        await api2.post("/verify-code", { mobile });
+      async requestVerifyCode({
+        commit
+      }, {
+        mobile
+      }) {
+        await api2.post("/verify-code", {
+          mobile
+        });
       },
 
-      async fetchCargoSources({ commit }) {
+      async fetchCargoSources({
+        commit
+      }) {
         let cargoSources = await api.get("/my/cargo-sources").then(res => res.data);
         commit("setCargoSources", cargoSources);
       },
 
-      async deleteCargoSource({ commit, state }, { id }) {
+      async deleteCargoSource({
+        commit,
+        state
+      }, {
+        id
+      }) {
         let cargoSources = state.cargoSources.filter(cs => cs.id != id);
         commit("setCargoSources", cargoSources);
       }

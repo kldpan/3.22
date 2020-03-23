@@ -159,7 +159,9 @@
         <!-- 第四层 -->
         <div class="foot">
           <span class="name">预估价：</span>
-          <span class="showprice">{{'￥' + priceData[0]}}</span>
+          <span
+            class="showprice"
+          >{{priceData.length === 0 ? '￥0.00' : '￥' + priceData[0].toFixed(2)}}</span>
         </div>
       </div>
     </div>
@@ -190,7 +192,7 @@
         <div class="autoprice fl" v-else>
           <div class="totalprice">
             <input type="radio" :checked="selectWhichPriceChecked" @click="selectWhichPrice()" />
-            <span>{{'￥' + priceData[0]}}</span>
+            <span>{{priceData.length === 0 ? '0' : '￥' + priceData[0]}}</span>
           </div>
           <div class="averageprice">每吨约{{parseInt(priceData[0]/userInputGoodWeight)}}元</div>
           <div class="length">运距约{{distance}}公里</div>
@@ -269,7 +271,7 @@ export default {
         "活禽活畜",
         "煤炭矿产"
       ],
-      userSelectedType: "棉麻布匹",
+      userSelectedGoodType: "棉麻布匹",
       userInputGoodWeight: "",
       userInputGoodVolume: "",
       userInputGoodName: "",
@@ -283,7 +285,8 @@ export default {
       userSelectedCarType: "平板",
       payWayModalBool: false,
       payWay: "",
-      userSelectTime: "",
+      loadDate: "",
+      loadTime: "",
       userNote: [],
       priceData: [],
       userInputPrice: 0,
@@ -325,7 +328,7 @@ export default {
     },
     selectGoodType(item, index) {
       this.goodTypeNum = index;
-      this.userSelectedType = item;
+      this.userSelectedGoodType = item;
     },
     userInputWeight() {
       this.userWeight = this.$refs.size.firstChild.lastChild.value || 0;
@@ -347,7 +350,7 @@ export default {
     inputPriceModalShow() {
       this.inputPriceModalBool = true;
     },
-    selectCarLength(item, index) {
+    async selectCarLength(item, index) {
       this.carLengthNum = index;
       this.userSelectedCarLength = item;
       // 发接口
@@ -368,6 +371,7 @@ export default {
           this.toastInstanse.$el.style.zIndex = 10000000;
           this.userInputGoodWeight = "";
         } else {
+          this.priceData = [];
           let countData = {
             weight: Number(this.userInputGoodWeight),
             distance: this.$store.state.distance,
@@ -375,18 +379,22 @@ export default {
           };
           console.log(countData);
           // 发接口
-          instance({
-            method: "get",
-            url: "/freight-calc",
-            params: countData
-          })
-            .then(res => {
-              console.log(res.data);
-              // this.priceData = [];
-              this.priceData.push(res.data.price);
-              console.log(this.priceData);
-            })
-            .catch(() => {});
+          this.priceData.push(
+            await this.$store.dispatch("calculateFreight", countData)
+          );
+          console.log(this.priceData);
+          // instance({
+          //   method: "get",
+          //   url: "/freight-calc",
+          //   params: countData
+          // })
+          //   .then(res => {
+          //     console.log(res.data);
+          //     // this.priceData = [];
+          //     this.priceData.push(res.data.price);
+          //     console.log(this.priceData);
+          //   })
+          //   .catch(() => {});
         }
       }
     },
@@ -434,6 +442,21 @@ export default {
     },
     sendToOrder() {
       // 1.携参跳转
+      let orderData = {
+        weight: this.userInputGoodWeight,
+        volume: this.userInputGoodVolume,
+        goodType: this.userSelectedGoodType,
+        goodName: this.userInputGoodName,
+        loadDate: this.loadDate,
+        loadTime: this.loadTime,
+        carLength: this.carLength,
+        carType: this.carType,
+        payWay: this.payWay
+      };
+      this.toPath({
+        path: "/waitfororders",
+        query: orderData
+      });
       // 2.本地保存数据
       // 3.发后端
     },

@@ -579,7 +579,7 @@ export default {
         driving.search(startLngLat, endLngLat, function(status, result) {
           // 未出错时，result即是对应的路线规划方案
           // 将该result数据存入localStorage中
-          localStorage.setItem("distanceInfo", JSON.stringify(result));
+          // localStorage.setItem("distanceInfo", JSON.stringify(result));
           console.log(result.routes[0].distance);
           for (let key in self.__VUE_HOT_MAP__) {
             if (key === "6fb47643") {
@@ -588,8 +588,11 @@ export default {
                 result.routes[0].distance / 1000
               );
               // 并将其存入vuex中
-              loadmapComponent.$store.dispatch("setDistanceInfo",result);
-              loadmapComponent.$store.dispatch("setDistance",Math.round(result.routes[0].distance / 1000));
+              loadmapComponent.$store.dispatch("setDistanceInfo", result);
+              loadmapComponent.$store.dispatch(
+                "setDistance",
+                Math.round(result.routes[0].distance / 1000)
+              );
               console.log(loadmapComponent.distance);
             }
           }
@@ -609,8 +612,7 @@ export default {
       console.log(recieveInfo);
       localStorage.setItem("recieveInfo", JSON.stringify(recieveInfo));
       this.toPath({
-        path: "/deliverydetails",
-        query: recieveInfo
+        path: "/deliverydetails"
       });
       this.getDistance();
     }

@@ -8,12 +8,8 @@
           <div class="sendIcon-n1">装</div>
         </div>
         <div class="send-n1-address fl">
-          <div
-            class="send-n1-big-area"
-            @click="toPath('/loadmap')"
-            v-if="sendBackInfo.length === 0"
-          >{{test01}}</div>
-          <div class="send-n1-big-area" @click="toPath('/loadmap')" v-else>{{test02}}</div>
+          <div class="send-n1-big-area" @click="toLoadMap()">{{loadCityArea}}</div>
+          <!-- <div class="send-n1-big-area" @click="toPath('/loadmap')" v-else>{{loadCityArea}}</div> -->
           <div class="send-n1-small-area">{{loadDetailAddress}}</div>
         </div>
         <div class="sendMore-n1 fr">
@@ -66,7 +62,7 @@
       <!-- 测距及选择几装几卸 -->
       <div class="n3 clearfix">
         <div class="length fl">
-          <p>运输距离 : {{current.status}}公里</p>
+          <p>运输距离 : {{distance}}公里</p>
         </div>
         <div class="loadway fr" @click="selectLoadway()">
           <span class="add">+</span>
@@ -236,6 +232,7 @@
 
 <script>
 export default {
+  name: "delivery",
   data() {
     const self = this;
     return {
@@ -284,31 +281,38 @@ export default {
       currentPosition: "",
       loadCityArea: "填写城市 / 区域",
       loadDetailAddress: "点击输入详细地址",
-      sendBackInfo: [1],
-      test01: "test01",
-      test02: "test02"
+      sendBackInfo: {},
+      distance: 0
     };
   },
+  beforeRouteEnter(to, from, next) {
+    console.log(to);
+    console.log(from);
+    next();
+  },
   mounted() {
-    console.log(this.$route);
     // 进入首页从vuex中将location和address取出
-    setTimeout(() => {
-      if (this.$store.state.address) {
-        this.loadCityArea =
-          this.$store.state.location.addressComponent.province +
+    if (JSON.stringify(this.$route.query) === "{}") {
+      console.log("初始化");
+      setTimeout(() => {
+        this.getLocation();
+      }, 1000);
+    } else {
+      console.log("返回");
+      // loadmap页跳转回来首页
+      this.sendBackInfo = this.$route.query;
+      console.log(this.sendBackInfo);
+      this.loadCityArea =
+        this.sendBackInfo.addDetailedInfo.addressComponent.province +
           " / " +
-          this.$store.state.location.addressComponent.city;
-        this.loadDetailAddress =
-          this.$store.state.location.addressComponent.district +
-          this.$store.state.location.addressComponent.township +
-          this.$store.state.location.addressComponent.street +
-          this.$store.state.location.addressComponent.streetNumber;
-      }
-    }, 1000);
-
-    // loadmap页跳转回来首页
-    console.log(this.$route.query);
-    this.sendBackInfo = this.$route.query;
+          this.sendBackInfo.addDetailedInfo.addressComponent.city ||
+        this.sendBackInfo.addDetailedInfo.addressComponent.district;
+      this.loadDetailAddress =
+        this.sendBackInfo.addDetailedInfo.addressComponent.district +
+        this.sendBackInfo.addDetailedInfo.addressComponent.township +
+        this.sendBackInfo.addDetailedInfo.addressComponent.street +
+        this.sendBackInfo.addDetailedInfo.addressComponent.streetNumber;
+    }
 
     // 后端测试数据
     // this.$apis.getTest01().then(res => {
@@ -316,6 +320,9 @@ export default {
     // });
   },
   watch: {},
+  beforeDestroy() {
+    // console.log(this);
+  },
   beforeRouteUpdate(to, from, next) {
     // if (to.path === "/") {
     //   console.log(this.loadCityArea);
@@ -339,6 +346,12 @@ export default {
     //   next();
     // }
   },
+
+  beforeRouteEnter(to, from, next) {
+    console.log(to);
+    console.log(from);
+    next();
+  },
   // 路由守卫
   // beforeRouteLeave(to, from, next) {
   //   console.log(to);
@@ -350,6 +363,19 @@ export default {
   //   }
   // },
   methods: {
+    getLocation() {
+      if (this.$store.state.address) {
+        this.loadCityArea =
+          this.$store.state.location.addressComponent.province +
+          " / " +
+          this.$store.state.location.addressComponent.city;
+        this.loadDetailAddress =
+          this.$store.state.location.addressComponent.district +
+          this.$store.state.location.addressComponent.township +
+          this.$store.state.location.addressComponent.street +
+          this.$store.state.location.addressComponent.streetNumber;
+      }
+    },
     changeLoadWay(item, index) {
       this.num = index;
       this.userSelectLoadWay = item;
@@ -368,6 +394,10 @@ export default {
     },
     setShowNum(num) {
       this.showNum = num;
+    },
+    toLoadMap() {
+      this.toPath("/loadmap");
+      // this.$route.query = {};
     },
     toPath(url) {
       this.$router.push(url);

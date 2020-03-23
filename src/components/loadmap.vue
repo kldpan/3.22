@@ -266,6 +266,19 @@ export default {
   components: {
     citypicker
   },
+  // beforeRouteLeave(to, from, next) {
+  //   console.log(to);
+  //   if (to.name === "delivery") {
+  //     console.log(self);
+  //     for (let key in self.__VUE_HOT_MAP__) {
+  //       if (key === "47323bf2") {
+  //         let deliveryComponent = self.__VUE_HOT_MAP__[key].instances[0];
+  //         console.log(deliveryComponent);
+  //       }
+  //     }
+  //   }
+  //   next();
+  // },
   mounted() {
     this.autoAddressInfo = this.$store.state.location;
     this.adMap();

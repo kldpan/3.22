@@ -128,6 +128,8 @@ export default {
         this.sendTime = this.userSelectedTime;
         console.log(this.sendDate, this.sendTime);
       }
+      this.$parent.loadDate = this.sendDate;
+      this.$parent.loadTime = this.sendTime;
     },
     getSelectDate() {
       let time = new Date().getTime();
